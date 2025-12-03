@@ -1,0 +1,287 @@
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { suppliersAPI, inventoryAPI } from '../services/api';
+import { Landmark, AlertTriangle, Banknote, CalendarClock, CheckCircle, Filter, Search, DollarSign } from 'lucide-react';
+import { InventoryTransaction } from '../types';
+
+const DebtView: React.FC = () => {
+    const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
+    const [suppliers, setSuppliers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+    const [selectedInvoice, setSelectedInvoice] = useState<InventoryTransaction | null>(null);
+    const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+    const [filterText, setFilterText] = useState('');
+
+    const loadData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const [txData, supData] = await Promise.all([
+                inventoryAPI.getTransactions(),
+                suppliersAPI.getSuppliers()
+            ]);
+            setTransactions(txData);
+            setSuppliers(supData);
+        } catch (err) {
+            console.error('Failed to load data:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    // Calculate outstanding invoices from transactions
+    const outstandingInvoices = useMemo(() => {
+        return transactions.filter(tx =>
+            tx.type === 'PURCHASE' &&
+            tx.paymentType === 'CREDIT' &&
+            tx.paymentStatus !== 'PAID'
+        );
+    }, [transactions]);
+
+    // Calculate analytics
+    const analytics = useMemo(() => {
+        const totalDebt = outstandingInvoices.reduce((sum, inv) =>
+            sum + (inv.quantity * (inv.pricePerUnit || 0)), 0
+        );
+
+        const today = new Date().toISOString().split('T')[0];
+        const totalOverdue = outstandingInvoices
+            .filter(inv => (inv.dueDate || '') < today)
+            .reduce((sum, inv) => sum + (inv.quantity * (inv.pricePerUnit || 0)), 0);
+
+        // Group by supplier
+        const debtBySupplierMap: Record<string, number> = {};
+        outstandingInvoices.forEach(inv => {
+            const supplierId = inv.supplierId || 'Unknown';
+            const amount = inv.quantity * (inv.pricePerUnit || 0);
+            debtBySupplierMap[supplierId] = (debtBySupplierMap[supplierId] || 0) + amount;
+        });
+
+        const debtBySupplier = Object.entries(debtBySupplierMap).map(([supplierId, amount]) => ({
+            name: suppliers.find(s => s.id === supplierId)?.name || 'Unknown',
+            amount
+        })).sort((a, b) => b.amount - a.amount);
+
+        return {
+            totalDebt,
+            totalOverdue,
+            count: outstandingInvoices.length,
+            debtBySupplier
+        };
+    }, [outstandingInvoices, suppliers]);
+
+    const handlePayClick = (tx: InventoryTransaction) => {
+        setSelectedInvoice(tx);
+        setPaymentDate(new Date().toISOString().split('T')[0]);
+        setPaymentModalOpen(true);
+    };
+
+    const confirmPayment = async () => {
+        if (!selectedInvoice) return;
+        try {
+            await inventoryAPI.updateTransaction(selectedInvoice.id, {
+                paymentStatus: 'PAID',
+                paymentDate: paymentDate,
+                paymentMethod: 'BANK_TRANSFER', // Default or add UI selector
+                notes: `Payment confirmed on ${paymentDate}`
+            });
+
+            // Refresh data
+            loadData();
+            setPaymentModalOpen(false);
+            setSelectedInvoice(null);
+        } catch (e: any) {
+            alert("Error processing payment: " + e.message);
+        }
+    };
+
+    const filteredInvoices = useMemo(() => {
+        return outstandingInvoices.filter(inv => {
+            const supplierName = suppliers.find(s => s.id === inv.supplierId)?.name || '';
+            const searchStr = `${supplierName} ${inv.referenceId}`.toLowerCase();
+            return searchStr.includes(filterText.toLowerCase());
+        });
+    }, [outstandingInvoices, filterText, suppliers]);
+
+    const today = new Date().toISOString().split('T')[0];
+
+    if (loading) {
+        return <div className="flex items-center justify-center h-64"><div className="text-slate-500">Loading...</div></div>;
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-800">Accounts Payable (Hutang)</h2>
+                    <p className="text-slate-500 text-sm">Monitor and settle outstanding supplier invoices</p>
+                </div>
+            </div>
+
+            {/* KPI Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+                    <div className="p-3 bg-amber-100 text-amber-600 rounded-full">
+                        <Landmark size={24} />
+                    </div>
+                    <div>
+                        <div className="text-2xl font-bold text-slate-900">Rp {analytics.totalDebt.toLocaleString()}</div>
+                        <div className="text-sm text-slate-500">Total Outstanding Debt</div>
+                    </div>
+                </div>
+                <div className={`bg-white p-5 rounded-xl shadow-sm border ${analytics.totalOverdue > 0 ? 'border-red-200 bg-red-50' : 'border-slate-200'} flex items-center gap-4`}>
+                    <div className={`p-3 rounded-full ${analytics.totalOverdue > 0 ? 'bg-red-200 text-red-700' : 'bg-green-100 text-green-600'}`}>
+                        <AlertTriangle size={24} />
+                    </div>
+                    <div>
+                        <div className="text-2xl font-bold text-slate-900">Rp {analytics.totalOverdue.toLocaleString()}</div>
+                        <div className="text-sm text-slate-500">Overdue Amount</div>
+                    </div>
+                </div>
+                <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+                    <div className="p-3 bg-blue-100 text-blue-600 rounded-full">
+                        <Banknote size={24} />
+                    </div>
+                    <div>
+                        <div className="text-2xl font-bold text-slate-900">{analytics.count}</div>
+                        <div className="text-sm text-slate-500">Unpaid Invoices</div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Main Invoice List */}
+                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                    <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                            <Filter size={18} className="text-slate-400" /> Outstanding Invoices
+                        </h3>
+                        <div className="relative">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <label htmlFor="debt-filter-input" className="sr-only">Search Supplier / PO...</label>
+                            <input
+                                id="debt-filter-input"
+                                type="text"
+                                placeholder="Search Supplier / PO..."
+                                className="pl-9 pr-3 py-1.5 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                                value={filterText}
+                                onChange={(e) => setFilterText(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-auto max-h-[500px]">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 sticky top-0">
+                                <tr>
+                                    <th className="px-6 py-3">Due Date</th>
+                                    <th className="px-6 py-3">Supplier</th>
+                                    <th className="px-6 py-3">PO Ref</th>
+                                    <th className="px-6 py-3 text-right">Amount</th>
+                                    <th className="px-6 py-3 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {filteredInvoices.map(inv => {
+                                    const isOverdue = (inv.dueDate || '') < today;
+                                    const supplierName = suppliers.find(s => s.id === inv.supplierId)?.name || 'Unknown';
+                                    const amount = inv.quantity * (inv.pricePerUnit || 0);
+                                    return (
+                                        <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
+                                            <td className="px-6 py-3">
+                                                <div className={`flex items-center gap-2 font-medium ${isOverdue ? 'text-red-600' : 'text-slate-700'}`}>
+                                                    <CalendarClock size={14} />
+                                                    {inv.dueDate}
+                                                </div>
+                                                {isOverdue && <span className="text-[10px] bg-red-100 text-red-700 px-1.5 rounded font-bold ml-6">OVERDUE</span>}
+                                            </td>
+                                            <td className="px-6 py-3 font-medium text-slate-800">{supplierName}</td>
+                                            <td className="px-6 py-3 font-mono text-xs text-slate-500">{inv.referenceId}</td>
+                                            <td className="px-6 py-3 text-right font-bold text-slate-800">Rp {amount.toLocaleString()}</td>
+                                            <td className="px-6 py-3 text-center">
+                                                <button
+                                                    onClick={() => handlePayClick(inv)}
+                                                    className="text-xs bg-green-50 text-green-700 border border-green-200 px-3 py-1.5 rounded hover:bg-green-100 font-bold flex items-center gap-1 mx-auto transition-colors"
+                                                >
+                                                    <CheckCircle size={12} /> Pay
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                {filteredInvoices.length === 0 && (
+                                    <tr><td colSpan={5} className="p-8 text-center text-slate-400">No outstanding invoices found.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Supplier Summary */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden h-fit">
+                    <div className="px-6 py-4 border-b border-slate-100 bg-slate-50">
+                        <h3 className="font-bold text-slate-800">Debt by Supplier</h3>
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                        {analytics.debtBySupplier.map((s, idx) => (
+                            <div key={idx} className="px-6 py-4 flex justify-between items-center hover:bg-slate-50">
+                                <span className="font-medium text-slate-700">{s.name}</span>
+                                <span className="font-bold text-slate-900">Rp {s.amount.toLocaleString()}</span>
+                            </div>
+                        ))}
+                        {analytics.debtBySupplier.length === 0 && (
+                            <div className="p-6 text-center text-slate-400 italic">No debt records.</div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Payment Modal */}
+            {paymentModalOpen && selectedInvoice && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in">
+                        <h3 className="text-lg font-bold text-slate-900 mb-1">Confirm Payment</h3>
+                        <p className="text-sm text-slate-500 mb-4">Mark Invoice {selectedInvoice.referenceId} as PAID</p>
+
+                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-4 space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-slate-500">Supplier:</span>
+                                <span className="font-bold">{suppliers.find(s => s.id === selectedInvoice.supplierId)?.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-500">Amount:</span>
+                                <span className="font-bold">Rp {(selectedInvoice.quantity * (selectedInvoice.pricePerUnit || 0)).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-500">Due Date:</span>
+                                <span className="text-red-600 font-medium">{selectedInvoice.dueDate}</span>
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <label htmlFor="payment-date-input" className="block text-xs font-bold text-slate-500 mb-1 uppercase">Payment Date</label>
+                            <input
+                                type="date"
+                                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500"
+                                value={paymentDate}
+                                onChange={e => setPaymentDate(e.target.value)}
+                                id="payment-date-input"
+                            />
+                        </div>
+
+                        <div className="flex justify-end gap-3">
+                            <button onClick={() => setPaymentModalOpen(false)} className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg">Cancel</button>
+                            <button onClick={confirmPayment} className="px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-lg shadow-green-600/20">
+                                <DollarSign size={16} /> Confirm Payment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default DebtView;

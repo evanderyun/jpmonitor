@@ -1,0 +1,19 @@
+import { describe, it, expect } from 'vitest'
+import '@testing-library/jest-dom/vitest'
+import { render, screen } from '@testing-library/react'
+import ErrorBoundary from '../components/ErrorBoundary'
+
+function Buggy() {
+  throw new Error('boom')
+}
+
+describe('ErrorBoundary', () => {
+  it('renders fallback on error', () => {
+    render(
+      <ErrorBoundary>
+        <Buggy />
+      </ErrorBoundary>
+    )
+    expect(screen.getByText('Terjadi kesalahan')).toBeTruthy()
+  })
+})
