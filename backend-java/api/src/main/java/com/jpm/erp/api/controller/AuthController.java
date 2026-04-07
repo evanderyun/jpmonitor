@@ -7,8 +7,12 @@ import com.jpm.erp.domains.core.entity.User;
 import com.jpm.erp.domains.core.repository.UserRepository;
 import com.jpm.erp.platform.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,65 +23,55 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-        private final AuthenticationManager authenticationManager;
-        private final JwtUtils jwtUtils;
-        private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-        @PostMapping("/login")
-        @Transactional(readOnly = true)
-        public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-                try {
-                        System.out.println("=== LOGIN ATTEMPT ===");
-                        System.out.println("Username: " + request.username());
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+    private final UserRepository userRepository;
 
-                        Authentication authentication = authenticationManager.authenticate(
-                                        new UsernamePasswordAuthenticationToken(request.username(),
-                                                        request.password()));
-                        System.out.println("Authentication successful");
+    @PostMapping("/login")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
-                        org.springframework.security.core.userdetails.UserDetails userDetails = (org.springframework.security.core.userdetails.UserDetails) authentication
-                                        .getPrincipal();
-                        System.out.println("UserDetails retrieved");
+            org.springframework.security.core.userdetails.UserDetails userDetails = 
+                (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
 
-                        User user = userRepository.findByUsername(request.username()).orElseThrow();
-                        System.out.println("User loaded from DB: " + user.getUsername());
-                        System.out.println(
-                                        "User role: " + (user.getRole() != null ? user.getRole().getCode() : "NULL"));
+            User user = userRepository.findByUsername(request.username())
+                    .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
 
-                        String token = jwtUtils.generateToken(userDetails);
-                        System.out.println("Token generated");
+            String token = jwtUtils.generateToken(userDetails);
 
-                        UserDTO userDTO = new UserDTO(
-                                        user.getId(),
-                                        user.getUsername(),
-                                        user.getEmail(),
-                                        user.getFullName(),
-                                        user.getRole().getName(),
-                                        user.getRole().getPermissions());
-                        System.out.println("UserDTO created");
+            UserDTO userDTO = new UserDTO(
+                    user.getId(), user.getUsername(), user.getEmail(), user.getFullName(),
+                    user.getRole().getName(), user.getRole().getPermissions());
 
-                        return ResponseEntity.ok(new AuthResponse(token, userDTO));
-                } catch (Exception e) {
-                        System.err.println("=== LOGIN ERROR ===");
-                        e.printStackTrace();
-                        throw e;
-                }
+            log.info("User logged in successfully: {}", user.getUsername());
+            return ResponseEntity.ok(new AuthResponse(token, userDTO));
+        } catch (BadCredentialsException e) {
+            log.warn("Failed login attempt for user: {}", request.username());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new AuthErrorResponse("Invalid username or password"));
+        } catch (Exception e) {
+            log.error("Login error for user: {}", request.username(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new AuthErrorResponse("An error occurred during login"));
         }
+    }
 
-        @GetMapping("/me")
-        @Transactional(readOnly = true)
-        public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
-                if (authentication == null)
-                        return ResponseEntity.status(401).build();
-                User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
+    @GetMapping("/me")
+    @Transactional(readOnly = true)
+    public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
+        if (authentication == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
 
-                UserDTO userDTO = new UserDTO(
-                                user.getId(),
-                                user.getUsername(),
-                                user.getEmail(),
-                                user.getFullName(),
-                                user.getRole().getName(),
-                                user.getRole().getPermissions());
-                return ResponseEntity.ok(userDTO);
-        }
+        UserDTO userDTO = new UserDTO(
+                user.getId(), user.getUsername(), user.getEmail(), user.getFullName(),
+                user.getRole().getName(), user.getRole().getPermissions());
+        return ResponseEntity.ok(userDTO);
+    }
+
+    private record AuthErrorResponse(String message) {}
 }

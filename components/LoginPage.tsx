@@ -14,20 +14,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        window.alert('DEBUG: Login button clicked!'); // DEBUG POPUP
-        console.error('DEBUG: Login button clicked', { username, password }); // DEBUG ERROR LOG
         setError('');
         setLoading(true);
 
         try {
-            const result = await authAPI.login(username.trim(), password.trim());
-            window.alert('LOGIN SUCCESS! Token: ' + result.token.substring(0, 10) + '...'); // DEBUG SUCCESS
-            console.log('Login successful:', result.user);
+            await authAPI.login(username.trim(), password.trim());
             onLoginSuccess();
         } catch (err: any) {
-            window.alert('LOGIN FAILED: ' + (err.message || 'Unknown error')); // DEBUG FAIL
-            setError(err.message || 'Login failed. Please check your credentials.');
-            console.error('Login error:', err);
+            setError(err.message || 'Invalid username or password');
         } finally {
             setLoading(false);
         }
@@ -39,7 +33,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 {/* Logo / Header */}
                 <div className="text-center mb-8">
                     <div className="inline-block p-6 bg-slate-800 border-2 border-red-600 rounded-2xl mb-4">
-                        {/* JPM Logo - Same as Navigation */}
                         <div className="flex font-black text-5xl tracking-tighter leading-none justify-center">
                             <span className="text-red-500">J</span>
                             <span className="text-red-500 transform translate-y-2">P</span>
@@ -60,7 +53,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Error Alert */}
                         {error && (
                             <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
                                 <AlertCircle size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
@@ -68,7 +60,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             </div>
                         )}
 
-                        {/* Username */}
                         <div>
                             <label htmlFor="username" className="block text-sm font-semibold text-slate-700 mb-2">
                                 Username
@@ -85,7 +76,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             />
                         </div>
 
-                        {/* Password */}
                         <div>
                             <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
                                 Password
@@ -102,7 +92,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             />
                         </div>
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading}
@@ -121,26 +110,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             )}
                         </button>
                     </form>
-
-                    {/* Default Credentials Hint */}
-                    <div className="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                        <p className="text-xs font-semibold text-slate-600 mb-2">Default Credentials:</p>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div>
-                                <span className="text-slate-500">Username:</span>
-                                <span className="ml-2 font-mono font-semibold text-slate-700">admin</span>
-                            </div>
-                            <div>
-                                <span className="text-slate-500">Password:</span>
-                                <span className="ml-2 font-mono font-semibold text-slate-700">admin123</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
-                {/* Footer */}
                 <div className="mt-6 text-center text-slate-400 text-sm">
-                    <p>© 2024 PT Java Persada Mandiri. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} PT Java Persada Mandiri. All rights reserved.</p>
                 </div>
             </div>
         </div>

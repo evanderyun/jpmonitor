@@ -1,5 +1,4 @@
 package com.jpm.erp.api.controller;
-
 import com.jpm.erp.domains.core.dto.LocationDTO;
 import com.jpm.erp.domains.core.entity.Location;
 import com.jpm.erp.domains.core.repository.LocationRepository;
@@ -7,8 +6,8 @@ import com.jpm.erp.platform.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -17,67 +16,28 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/locations")
 @RequiredArgsConstructor
 public class LocationController {
-
     private final LocationRepository locationRepository;
 
     @GetMapping
-    public List<LocationDTO> getAllLocations() {
-        return locationRepository.findAll().stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
-    }
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'MANAGER', 'STAFF')")
+    public List<LocationDTO> getAllLocations() { return locationRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList()); }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LocationDTO> getLocation(@PathVariable UUID id) {
-        Location location = locationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Location", id));
-        return ResponseEntity.ok(mapToDTO(location));
-    }
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'MANAGER', 'STAFF')")
+    public ResponseEntity<LocationDTO> getLocation(@PathVariable UUID id) { Location loc = locationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Location", id)); return ResponseEntity.ok(mapToDTO(loc)); }
 
     @PostMapping
-    public ResponseEntity<LocationDTO> createLocation(@Valid @RequestBody LocationDTO dto) {
-        Location location = new Location();
-        updateLocationFromDTO(location, dto);
-
-        Location saved = locationRepository.save(location);
-        return ResponseEntity.ok(mapToDTO(saved));
-    }
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<LocationDTO> createLocation(@Valid @RequestBody LocationDTO dto) { Location loc = new Location(); updateLocationFromDTO(loc, dto); return ResponseEntity.ok(mapToDTO(locationRepository.save(loc))); }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LocationDTO> updateLocation(@PathVariable UUID id, @Valid @RequestBody LocationDTO dto) {
-        Location location = locationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Location", id));
-
-        updateLocationFromDTO(location, dto);
-        Location saved = locationRepository.save(location);
-        return ResponseEntity.ok(mapToDTO(saved));
-    }
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<LocationDTO> updateLocation(@PathVariable UUID id, @Valid @RequestBody LocationDTO dto) { Location loc = locationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Location", id)); updateLocationFromDTO(loc, dto); return ResponseEntity.ok(mapToDTO(locationRepository.save(loc))); }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLocation(@PathVariable UUID id) {
-        if (!locationRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Location", id);
-        }
-        locationRepository.deleteById(id);
-        return ResponseEntity.ok().build();
-    }
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<Void> deleteLocation(@PathVariable UUID id) { if (!locationRepository.existsById(id)) throw new ResourceNotFoundException("Location", id); locationRepository.deleteById(id); return ResponseEntity.ok().build(); }
 
-    // Helper methods
-    private void updateLocationFromDTO(Location location, LocationDTO dto) {
-        location.setCode(dto.code());
-        location.setName(dto.name());
-        location.setAddress(dto.address());
-        location.setType(dto.type());
-        // Project linking logic skipped for brevity - would need ProjectRepository
-    }
-
-    private LocationDTO mapToDTO(Location loc) {
-        return new LocationDTO(
-                loc.getId(),
-                loc.getProject() != null ? loc.getProject().getId() : null,
-                loc.getCode(),
-                loc.getName(),
-                loc.getAddress(),
-                loc.getType());
-    }
+    private void updateLocationFromDTO(Location loc, LocationDTO dto) { loc.setCode(dto.code()); loc.setName(dto.name()); loc.setAddress(dto.address()); loc.setType(dto.type()); }
+    private LocationDTO mapToDTO(Location l) { return new LocationDTO(l.getId(), l.getProject() != null ? l.getProject().getId() : null, l.getCode(), l.getName(), l.getAddress(), l.getType()); }
 }

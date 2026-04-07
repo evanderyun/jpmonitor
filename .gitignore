@@ -39,3 +39,17 @@ bin/
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables (SENSITIVE)
+.env
+.env.*
+!.env.example
+*.env
+
+# Password files
+.admin-password
+*.key
+*.pem
+
+# OS files
+Thumbs.db
