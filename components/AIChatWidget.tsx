@@ -11,7 +11,7 @@ interface Message {
 const AIChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'assistant', content: 'Halo! Saya Hermes, AI Assistant JPM ERP. Ada yang bisa saya bantu?', timestamp: new Date() }
+    { id: '1', role: 'assistant', content: 'Halo! Saya Hestia, AI Assistant JPM ERP. Ada yang bisa saya bantu?', timestamp: new Date() }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -64,7 +64,7 @@ const AIChatWidget: React.FC = () => {
         aria-label="Open AI Assistant"
       >
         <MessageSquare size={20} />
-        <span className="text-sm font-medium">Hermes AI</span>
+        <span className="text-sm font-medium">Hestia AI</span>
       </button>
     );
   }
@@ -78,7 +78,7 @@ const AIChatWidget: React.FC = () => {
             <Bot size={18} className="text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Hermes AI Assistant</h3>
+            <h3 className="text-sm font-semibold text-white">Hestia AI Assistant</h3>
             <p className="text-xs text-white/70">JPM ERP</p>
           </div>
         </div>
