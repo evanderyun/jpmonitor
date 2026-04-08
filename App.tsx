@@ -13,6 +13,7 @@ const LocationView = React.lazy(() => import('./components/LocationView'))
 const TimesheetView = React.lazy(() => import('./components/TimesheetView'))
 const DebtView = React.lazy(() => import('./components/DebtView'))
 import LoginPage from './components/LoginPage';
+import AIChatWidget from './components/AIChatWidget';
 import { getCurrentUser, clearAuthData } from './services/authStorage';
 
 const App: React.FC = () => {
@@ -120,6 +121,7 @@ const App: React.FC = () => {
           {renderContent()}
         </div>
       </main>
+      <AIChatWidget />
     </div>
   );
 };
