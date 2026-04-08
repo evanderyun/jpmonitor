@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+:root {
+  --stripe-purple: #533afd;
+  --stripe-purple-hover: #4434d4;
+  --stripe-navy: #061b31;
+  --stripe-dark-navy: #0d253d;
+  --stripe-brand-dark: #1c1e54;
+  --stripe-body: #64748d;
+  --stripe-label: #273951;
+  --stripe-border: #e5edf5;
+  --stripe-white: #ffffff;
+  --font-sans: "Inter", "SF Pro Display", system-ui, -apple-system, sans-serif;
+  --font-mono: "Source Code Pro", "SFMono-Regular", monospace;
+}
+
+* {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--stripe-white);
+  color: var(--stripe-navy);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--stripe-purple);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

@@ -34,7 +34,7 @@ services:
       SPRING_DATASOURCE_USERNAME: jpm_user
       SPRING_DATASOURCE_PASSWORD: JpmErpDbPass2026Secure!
       JWT_SECRET: ${JWT_SECRET}
-      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173,http://localhost
+      APP_CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173,https://jpm-erp.duckdns.org
       SPRING_PROFILES_ACTIVE: production
     ports:
       - "127.0.0.1:8080:8080"
