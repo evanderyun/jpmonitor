@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { dashboardAPI } from '../services/api';
-import { generateMiningInsights } from '../services/geminiService';
-import { Sparkles, TrendingUp, AlertTriangle, Database, Pickaxe, PackageSearch, CheckCircle, RefreshCw } from 'lucide-react';
+import { Card, StatCard, Badge, SectionHeader } from './ui/Card';
+import { Pickaxe, Database, TrendingUp, AlertTriangle, PackageSearch, CheckCircle, RefreshCw, Sparkles } from 'lucide-react';
 
 const DashboardView: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [insight, setInsight] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     try {
@@ -23,224 +19,124 @@ const DashboardView: React.FC = () => {
       setError(null);
     } catch (err: any) {
       if (err?.name === 'AbortError') return;
-      console.error('Failed to load dashboard stats:', err);
       setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAIAnalysis = async () => {
-    setAnalyzing(true);
-    try {
-      const result = await generateMiningInsights();
-      setInsight(result);
-    } catch (err) {
-      console.error('AI Analysis failed:', err);
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
   if (loading && !stats) {
-    return <div className="p-8 text-center text-slate-500">Loading dashboard data...</div>;
+    return <div className="p-8 text-center text-text-muted">Loading dashboard data...</div>;
   }
 
   if (error) {
     return (
       <div className="p-8 text-center">
-        <div className="text-red-500 mb-2">{error}</div>
-        <button onClick={loadData} className="text-blue-600 underline">Retry</button>
+        <div className="text-jpm-red mb-2">{error}</div>
+        <button onClick={loadData} className="text-jpm-red underline">Retry</button>
       </div>
     );
   }
 
-  // Safe access helpers
   const totalCoal = stats?.production?.totalCoal ?? 0;
   const totalOB = stats?.production?.totalOB ?? 0;
   const avgSR = stats?.production?.avgSR ?? 0;
   const chartData = stats?.production?.chartData ?? [];
-  
   const fleetAvail = stats?.fleet?.availability ?? 0;
   const fleetTotal = stats?.fleet?.total ?? 0;
   const fleetOps = stats?.fleet?.operational ?? 0;
-  
   const lowStockCount = stats?.inventory?.lowStockCount ?? 0;
   const lowStockItems = stats?.inventory?.lowStockItems ?? [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Executive Dashboard</h2>
-          <p className="text-slate-500 text-sm">Real-time operational intelligence & KPIs</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={loadData}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            title="Refresh Data"
-          >
-            <RefreshCw size={18} />
+    <div className="space-y-8">
+      <SectionHeader
+        title="Executive Dashboard"
+        subtitle="Real-time operational intelligence and KPIs"
+        action={
+          <button onClick={loadData} className="p-2 border border-border rounded-jpm hover:bg-bg-elevated transition-colors text-text-muted" title="Refresh">
+            <RefreshCw size={16} />
           </button>
-          <button
-            onClick={handleAIAnalysis}
-            disabled={analyzing}
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-70 hover:scale-105 active:scale-95"
-          >
-            {analyzing ? <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div> : <Sparkles size={18} />}
-            {analyzing ? 'Analyzing Data...' : 'Generate AI Insight'}
-          </button>
-        </div>
-      </div>
-
-      {insight && (
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-6 animate-fade-in shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
-              <Sparkles size={24} />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-indigo-900 mb-2 text-lg">Gemini AI Strategic Analysis</h3>
-              <div className="prose prose-indigo text-indigo-800 text-sm leading-relaxed whitespace-pre-line max-w-none">
-                {insight}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        }
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Total Coal (MT)</span>
-              <Pickaxe size={18} className="text-blue-500" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">{totalCoal.toLocaleString()}</div>
-            <div className="text-xs text-green-600 mt-2 font-medium flex items-center gap-1 bg-green-50 inline-flex px-2 py-1 rounded-full">
-              <TrendingUp size={12} /> +4.5% vs Target
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-slate-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Total OB (BCM)</span>
-              <Database size={18} className="text-slate-500" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">{totalOB.toLocaleString()}</div>
-            <div className="text-xs text-slate-500 mt-2">YTD Accumulation</div>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-amber-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Avg. Strip Ratio</span>
-              <TrendingUp size={18} className="text-amber-500" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">{avgSR}</div>
-            <div className="text-xs text-amber-600 mt-2 font-medium">High due to South Wall</div>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Fleet Availability</span>
-              <AlertTriangle size={18} className="text-red-500" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">{fleetAvail}%</div>
-            <div className="text-xs text-red-600 mt-2 font-medium bg-red-50 inline-flex px-2 py-1 rounded-full">
-              {fleetTotal - fleetOps} Critical Breakdown
-            </div>
-          </div>
-        </div>
+        <StatCard
+          label="Total Coal (MT)"
+          value={totalCoal.toLocaleString()}
+          icon={<Pickaxe size={20} />}
+          trend={{ value: 4.5, positive: true }}
+        />
+        <StatCard
+          label="Total OB (BCM)"
+          value={totalOB.toLocaleString()}
+          icon={<Database size={20} />}
+        />
+        <StatCard
+          label="Avg. Strip Ratio"
+          value={avgSR}
+          icon={<TrendingUp size={20} />}
+        />
+        <StatCard
+          label="Fleet Availability"
+          value={fleetAvail + '%'}
+          icon={<AlertTriangle size={20} />}
+          trend={{ value: Math.max(fleetTotal - fleetOps, 0), positive: fleetTotal - fleetOps === 0 }}
+        />
       </div>
 
-      {/* Charts & Inventory Health */}
+      {/* Charts & Inventory */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-96">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-slate-800 flex items-center gap-2">
-              <Database size={18} className="text-slate-400" />
-              Production Volume
-            </h3>
-          </div>
-          <ResponsiveContainer width="100%" height="85%">
-            <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis yAxisId="left" orientation="left" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+        {/* Production Chart */}
+        <Card className="lg:col-span-2 p-6" hover={false}>
+          <h3 className="text-lg font-light text-text-primary tracking-tight mb-4" style={{ letterSpacing: '-0.01em' }}>Production Volume</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis dataKey="date" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis yAxisId="left" orientation="left" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis yAxisId="right" orientation="right" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                itemStyle={{ color: '#e2e8f0' }}
-                cursor={{ fill: '#f8fafc' }}
+                contentStyle={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', boxShadow: 'var(--shadow-elevated)' }}
+                labelStyle={{ color: 'var(--text-primary)', fontWeight: 500 }}
               />
-              <Legend wrapperStyle={{ paddingTop: '10px' }} />
-              <Bar yAxisId="left" dataKey="OB" fill="#3b82f6" name="Overburden (BCM)" radius={[4, 4, 0, 0]} barSize={30} />
-              <Bar yAxisId="right" dataKey="Coal" fill="#10b981" name="Coal (MT)" radius={[4, 4, 0, 0]} barSize={30} />
+              <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px', color: 'var(--text-muted)' }} />
+              <Bar yAxisId="left" dataKey="OB" fill="#3b82f6" name="Overburden (BCM)" radius={[4, 4, 0, 0]} barSize={24} />
+              <Bar yAxisId="right" dataKey="Coal" fill="#16a34a" name="Coal (MT)" radius={[4, 4, 0, 0]} barSize={24} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </Card>
 
-        {/* Inventory Health Widget */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-96 flex flex-col">
+        {/* Inventory Health */}
+        <Card className="p-6" hover={false}>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-slate-800 flex items-center gap-2">
-              <PackageSearch size={18} className="text-slate-400" />
-              Inventory Health
-            </h3>
-            {lowStockCount > 0 && (
-              <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                {lowStockCount} Alert(s)
-              </span>
-            )}
+            <h3 className="text-lg font-light text-text-primary tracking-tight" style={{ letterSpacing: '-0.01em' }}>Inventory Health</h3>
+            {lowStockCount > 0 && <Badge variant="error">{lowStockCount} Alert(s)</Badge>}
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1">
             {lowStockCount === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-400">
-                <CheckCircle size={40} className="text-green-200 mb-2" />
+              <div className="h-full flex flex-col items-center justify-center text-text-muted py-8">
+                <CheckCircle size={32} className="text-status-success mb-2" />
                 <p className="text-sm font-medium">Stock Levels Healthy</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {lowStockItems.map((item: any) => (
-                  <div key={item.id} className="bg-red-50 border border-red-100 p-3 rounded-lg">
-                    <div className="flex justify-between items-start mb-1">
-                      <p className="text-sm font-bold text-slate-800">{item.name}</p>
-                      <span className="text-xs font-mono text-red-600 font-bold">{item.currentStock} {item.unit}</span>
-                    </div>
-                    <p className="text-xs text-slate-500 mb-2">Min: {item.minStockLevel} • {item.partNumber}</p>
-                    <div className="w-full bg-red-200 rounded-full h-1.5">
-                      <div
-                        className="bg-red-500 h-1.5 rounded-full"
-                        style={{ width: `${Math.min((item.currentStock / item.minStockLevel) * 100, 100)}%` }}
-                      ></div>
-                    </div>
+              lowStockItems.map((item: any) => (
+                <div key={item.id} className="bg-jpm-red-subtle border border-jpm-red/30 p-3 rounded-jpm">
+                  <div className="flex justify-between items-start mb-1">
+                    <p className="text-sm font-medium text-text-primary">{item.name}</p>
+                    <span className="text-xs font-mono text-jpm-red font-bold">{item.currentStock} {item.unit}</span>
                   </div>
-                ))}
-              </div>
+                  <p className="text-xs text-text-muted mb-2">Min: {item.minStockLevel} - {item.partNumber}</p>
+                  <div className="w-full bg-jpm-red/20 rounded-full h-1.5">
+                    <div className="bg-jpm-red h-1.5 rounded-full" style={{ width: Math.min((item.currentStock / item.minStockLevel) * 100, 100) + '%' }}></div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
-
-          <div className="mt-4 pt-4 border-t border-slate-100">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-slate-500">Total Asset Value</span>
-              <span className="font-bold text-slate-800">Rp 18.5 M</span>
-            </div>
-          </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
