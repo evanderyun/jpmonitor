@@ -1,7 +1,5 @@
-
-
-import React from 'react';
-import { LayoutDashboard, Hammer, Truck, FileText, Activity, Settings, PackageSearch, ArrowRightLeft, Users, ShoppingBag, MapPin, Clock, Landmark, LogOut } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutDashboard, Hammer, Truck, FileText, Activity, Settings, PackageSearch, ArrowRightLeft, Users, ShoppingBag, MapPin, Clock, Landmark, LogOut, Moon, Sun } from 'lucide-react';
 
 interface NavProps {
   activeTab: string;
@@ -11,75 +9,83 @@ interface NavProps {
 }
 
 const Navigation: React.FC<NavProps> = ({ activeTab, setActiveTab, currentUser, onLogout }) => {
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('jpm-dark-mode');
+      if (stored !== null) return stored === 'true';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('jpm-dark-mode', String(darkMode));
+  }, [darkMode]);
+
   const menuItems = [
-    { id: 'dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
-    { id: 'timesheet', label: 'Timesheets (HM)', icon: Clock },
-    { id: 'location', label: 'Project Locations', icon: MapPin },
-    { id: 'production', label: 'Production Control', icon: Hammer },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'fleet', label: 'Fleet Management', icon: Truck },
     { id: 'mutation', label: 'Unit Mutation', icon: ArrowRightLeft },
-    { id: 'inventory', label: 'Inventory & Spareparts', icon: PackageSearch },
-    { id: 'supplier', label: 'Suppliers & Vendors', icon: ShoppingBag },
-    { id: 'debt', label: 'Finance & Debt', icon: Landmark }, // New Item
+    { id: 'inventory', label: 'Inventory', icon: PackageSearch },
+    { id: 'production', label: 'Production', icon: Hammer },
+    { id: 'timesheet', label: 'Timesheets', icon: Clock },
     { id: 'employee', label: 'Employee & HR', icon: Users },
-    { id: 'audit', label: 'Audit Trails', icon: FileText },
+    { id: 'supplier', label: 'Suppliers', icon: ShoppingBag },
+    { id: 'debt', label: 'Finance', icon: Landmark },
+    { id: 'location', label: 'Locations', icon: MapPin },
     { id: 'hse', label: 'HSE & Safety', icon: Activity },
+    { id: 'audit', label: 'Audit Trails', icon: FileText },
   ];
 
   return (
-    <div className="w-64 bg-slate-900 text-white flex flex-col h-screen fixed left-0 top-0 shadow-xl z-20" role="navigation" aria-label="Main Navigation">
-      <div className="p-6 border-b border-slate-700">
-        <div className="flex items-center gap-3 mb-1">
-          {/* Simulated JPM Logo */}
-          <div className="flex font-black text-2xl tracking-tighter leading-none">
-            <span className="text-red-500">J</span>
-            <span className="text-red-500 transform translate-y-1">P</span>
-            <span className="text-red-500">M</span>
+    <div className="w-64 bg-bg-panel border-r border-border flex flex-col h-screen fixed left-0 top-0 z-20 transition-colors duration-300">
+      <div className="p-5 border-b border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex font-black text-2xl tracking-tighter leading-none">
+              <span className="text-jpm-red">J</span>
+              <span className="text-jpm-red transform translate-y-1">P</span>
+              <span className="text-jpm-red">M</span>
+            </div>
+            <div>
+              <h1 className="text-xs font-semibold text-text-primary leading-tight">JPM ERP</h1>
+              <p className="text-[10px] text-text-muted uppercase tracking-wider">Mining Operations</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-sm font-bold leading-tight text-white tracking-wide">PT JAVA PERSADA MANDIRI</h1>
-          </div>
+          <button onClick={() => setDarkMode(!darkMode)} className="p-1.5 rounded-jpm border border-border hover:bg-bg-elevated transition-colors text-text-muted" aria-label="Toggle dark mode">
+            {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
         </div>
-        <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest pl-1">General Contractor</div>
       </div>
 
-      <nav className="flex-1 py-6 space-y-1 px-3 overflow-y-auto">
+      <nav className="flex-1 py-4 space-y-0.5 px-3 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${isActive
-                  ? 'bg-red-600 text-white shadow-md'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                }`}
-            >
-              <Icon size={18} />
-              {item.label}
+            <button key={item.id} onClick={() => setActiveTab(item.id)} className={
+              'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-jpm-md transition-all duration-200 ' +
+              (isActive ? 'bg-jpm-red text-white font-medium' : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary')
+            }>
+              <Icon size={16} className="flex-shrink-0" />
+              <span className="truncate">{item.label}</span>
             </button>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-700">
-        <div className="flex items-center gap-3 px-2 py-2 text-slate-400 hover:text-white cursor-pointer">
-          <Settings size={18} />
-          <span className="text-sm font-medium">System Config</span>
-        </div>
-        <div className="mt-4 px-2">
-          <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Current User</p>
-          <p className="text-sm text-white mt-1">{currentUser?.fullName || 'System Administrator'}</p>
-          <p className="text-xs text-slate-400">Role: {currentUser?.role || 'Admin'}</p>
-        </div>
+      <div className="p-4 border-t border-border">
+        {currentUser && (
+          <div className="mb-3 px-2">
+            <p className="text-xs text-text-muted uppercase font-medium tracking-wider">{currentUser.fullName || 'Admin'}</p>
+            <p className="text-xs text-text-muted mt-0.5">{currentUser.role || 'Super Admin'}</p>
+          </div>
+        )}
         {onLogout && (
-          <button
-            onClick={onLogout}
-            className="mt-3 w-full flex items-center gap-2 px-4 py-2 text-sm bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors"
-          >
+          <button onClick={onLogout} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-muted hover:text-jpm-red hover:bg-jpm-red-subtle rounded-jpm-md transition-colors">
             <LogOut size={16} />
-            Logout
+            <span>Sign Out</span>
           </button>
         )}
       </div>

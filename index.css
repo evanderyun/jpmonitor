@@ -1,31 +1,141 @@
 @import "tailwindcss";
 
-:root {
-  --stripe-purple: #533afd;
-  --stripe-purple-hover: #4434d4;
-  --stripe-navy: #061b31;
-  --stripe-dark-navy: #0d253d;
-  --stripe-brand-dark: #1c1e54;
-  --stripe-body: #64748d;
-  --stripe-label: #273951;
-  --stripe-border: #e5edf5;
-  --stripe-white: #ffffff;
-  --font-sans: "Inter", "SF Pro Display", system-ui, -apple-system, sans-serif;
+@theme {
+  --radius-jpm: 4px;
+  --radius-jpm-md: 6px;
+  --radius-jpm-lg: 8px;
+  --radius-pill: 9999px;
+  --font-sans: "Inter Variable", "SF Pro Display", system-ui, sans-serif;
   --font-mono: "Source Code Pro", "SFMono-Regular", monospace;
+}
+
+/* ============================================================
+   JPM ERP Custom Utilities
+   Brand colors defined here for Tailwind v4 compatibility
+   ============================================================ */
+.bg-jpm-red { background-color: #dc2626; }
+.hover\:bg-jpm-red-hover:hover { background-color: #ef4444; }
+.text-jpm-red { color: #dc2626; }
+.border-jpm-red { border-color: #dc2626; }
+.focus\:ring-jpm-red:focus { --tw-ring-color: #dc2626; }
+.bg-jpm-red-subtle { background-color: #fef2f2; }
+.dark .dark\:bg-jpm-red-subtle { background-color: rgba(220,38,38,0.15); }
+.dark .dark\:focus\:ring-offset-bg-page { --tw-ring-offset-color: #08090a; }
+
+/* ============================================================
+   CSS Custom Properties - Light Mode (default)
+   ============================================================ */
+/* ============================================================
+   JPM ERP Custom Utilities - for Tailwind v4 compatibility
+   ============================================================ */
+
+/* Background colors */
+.bg-bg-page { background-color: var(--bg-page); }
+.bg-bg-panel { background-color: var(--bg-panel); }
+.bg-bg-surface { background-color: var(--bg-surface); }
+.bg-bg-elevated { background-color: var(--bg-elevated); }
+
+/* Text colors */
+.text-text-primary { color: var(--text-primary); }
+.text-text-secondary { color: var(--text-secondary); }
+.text-text-muted { color: var(--text-muted); }
+.text-text-quaternary { color: var(--text-quaternary); }
+
+/* Border colors */
+.border-border { border-color: var(--border); }
+.border-border-hover { border-color: var(--border-hover, var(--border)); }
+.border-border-subtle { border-color: var(--border-subtle); }
+
+/* Hover variants */
+.hover\:bg-bg-elevated:hover { background-color: var(--bg-elevated); }
+.hover\:text-text-primary:hover { color: var(--text-primary); }
+.hover\:border-border-hover:hover { border-color: var(--border-hover, var(--border)); }
+
+/* Brand colors */
+.bg-jpm-red { background-color: #dc2626; }
+.hover\:bg-jpm-red-hover:hover { background-color: #ef4444; }
+.text-jpm-red { color: #dc2626; }
+.border-jpm-red { border-color: #dc2626; }
+.focus\:ring-jpm-red:focus { --tw-ring-color: #dc2626; }
+.bg-jpm-red-subtle { background-color: #fef2f2; }
+.dark .dark\:bg-jpm-red-subtle { background-color: rgba(220,38,38,0.15); }
+.hover\:text-jpm-red:hover { color: #dc2626; }
+.hover\:bg-jpm-red-subtle:hover { background-color: #fef2f2; }
+.dark .dark\:hover\:bg-jpm-red-subtle:hover { background-color: rgba(220,38,38,0.15); }
+.dark .dark\:focus\:ring-offset-bg-page { --tw-ring-offset-color: #08090a; }
+
+/* Status colors */
+.bg-status-success-bg { background-color: var(--success-bg); }
+.text-status-success { color: var(--success); }
+.border-status-success-border { border-color: var(--success-border); }
+.text-status-error { color: var(--error); }
+.bg-warning { background-color: var(--warning); }
+.text-warning { color: var(--warning); }
+
+:root {
+  --jpm-red: #dc2626;
+  --jpm-red-hover: #ef4444;
+  --jpm-red-subtle: #fef2f2;
+  --bg-page: #f7f8f8;
+  --bg-panel: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f3f4f5;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-quaternary: #cbd5e1;
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --success: #16a34a;
+  --success-bg: rgba(22,163,74,0.1);
+  --success-border: rgba(22,163,74,0.3);
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-elevated: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+
+.dark {
+  --bg-page: #08090a;
+  --bg-panel: #0f1011;
+  --bg-surface: #191a1b;
+  --bg-elevated: #28282c;
+  --text-primary: #f7f8f8;
+  --text-secondary: #d0d6e0;
+  --text-muted: #8a8f98;
+  --text-quaternary: #62666d;
+  --border: rgba(255,255,255,0.08);
+  --border-subtle: rgba(255,255,255,0.05);
+  --success: #27a644;
+  --success-bg: rgba(39,166,68,0.15);
+  --success-border: rgba(39,166,68,0.3);
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-elevated: none;
 }
 
 * {
   font-family: var(--font-sans);
+  font-feature-settings: "cv01", "ss03";
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 body {
-  background: var(--stripe-white);
-  color: var(--stripe-navy);
+  background: var(--bg-page);
+  color: var(--text-secondary);
 }
 
 *:focus-visible {
-  outline: 2px solid var(--stripe-purple);
+  outline: 2px solid var(--jpm-red);
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-page); }
+::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }

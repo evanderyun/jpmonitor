@@ -53,7 +53,7 @@ const App: React.FC = () => {
   // Show loading while checking auth
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen transition-colors duration-300 bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-white">Loading...</p>
@@ -107,7 +107,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f1f5f9]">
+    <div className="flex min-h-screen transition-colors duration-300 bg-bg-page">
       <Navigation
         activeTab={activeTab}
         setActiveTab={setActiveTab}
