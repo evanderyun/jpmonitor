@@ -3,7 +3,6 @@
 import json
 import subprocess
 import os
-import re
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 MAX_TURNS = "5"
@@ -11,6 +10,24 @@ ENV = os.environ.copy()
 ENV["HOME"] = "/home/hermes"
 ENV["PATH"] = "/home/hermes/.hermes/hermes-agent/venv/bin:/usr/local/bin:/usr/bin:/bin"
 ENV["PYTHONUNBUFFERED"] = "1"
+
+def clean_output(raw):
+    lines = raw.strip().split("\n")
+    cleaned = []
+    for line in lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("Warning:"):
+            continue
+        if s.startswith("session_id:"):
+            continue
+        if s.startswith("Aborted"):
+            continue
+        if s.startswith("│") or s.startswith("├") or s.startswith("└") or s.startswith("┌") or s.startswith("┐"):
+            continue
+        cleaned.append(line)
+    return "\n".join(cleaned).strip()
 
 class HestiaHandler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -55,11 +72,7 @@ class HestiaHandler(BaseHTTPRequestHandler):
                 env=ENV
             )
 
-            output = result.stdout.strip()
-            output = re.sub(r"^Warning:.*\n?", "", output, flags=re.MULTILINE)
-            output = re.sub(r"\nsession_id:.*", "", output)
-            output = re.sub(r"^Aborted.*\n?", "", output, flags=re.MULTILINE)
-            output = output.strip()
+            output = clean_output(result.stdout)
 
             if output:
                 self.send_response(200)
