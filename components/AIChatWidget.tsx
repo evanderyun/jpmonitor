@@ -1,25 +1,27 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import { MessageSquare, X, Send, Bot, Loader2 } from "lucide-react";
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  loading?: boolean;
 }
 
 const AIChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'assistant', content: 'Halo! Saya Hestia, AI Assistant JPM ERP. Ada yang bisa saya bantu?', timestamp: new Date() }
+    { id: "1", role: "assistant", content: "Halo! Saya Hestia, asisten AI JPM ERP. Ada yang bisa saya bantu?", timestamp: new Date() }
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
@@ -29,31 +31,35 @@ const AIChatWidget: React.FC = () => {
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: input.trim(), timestamp: new Date() };
-    setMessages(prev => [...prev, userMsg]);
-    setInput('');
+    const userMsg: Message = { id: Date.now().toString(), role: "user", content: input.trim(), timestamp: new Date() };
+    const loadingMsg: Message = { id: "loading", role: "assistant", content: "", timestamp: new Date(), loading: true };
+    setMessages(prev => [...prev, userMsg, loadingMsg]);
+    setInput("");
     setLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg.content }),
       });
-
       const data = await response.json();
-      const assistantMsg: Message = { id: (Date.now() + 1).toString(), role: 'assistant', content: data.reply || 'Maaf, saya tidak bisa memproses permintaan Anda.', timestamp: new Date() };
-      setMessages(prev => [...prev, assistantMsg]);
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== "loading");
+        return [...filtered, { id: Date.now().toString(), role: "assistant", content: data.reply || "Maaf, saya tidak bisa memproses permintaan Anda.", timestamp: new Date() }];
+      });
     } catch (err) {
-      const errorMsg: Message = { id: (Date.now() + 1).toString(), role: 'assistant', content: 'Terjadi kesalahan. Silakan coba lagi.', timestamp: new Date() };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== "loading");
+        return [...filtered, { id: Date.now().toString(), role: "assistant", content: "Terjadi kesalahan. Silakan coba lagI.", timestamp: new Date() }];
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   if (!isOpen) {
@@ -64,21 +70,21 @@ const AIChatWidget: React.FC = () => {
         aria-label="Open AI Assistant"
       >
         <MessageSquare size={20} />
-        <span className="text-sm font-medium">Hestia AI</span>
+        <span className="text-sm font-medium">A tia AI</span>
       </button>
     );
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 bg-bg-surface border border-border rounded-jpm-xl shadow-elevated z-50 flex flex-col overflow-hidden" style={{ maxHeight: '32rem' }}>
+    <div className="fixed bottom-6 right-6 w-96 bg-bg-surface border border-border rounded-jpa-xl shadow-elevated z-50 flex flex-col" style={{ maxHeight: "32rem" }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-jpm-red">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-jpm-red rounded-t-jpm-xl">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-white/20 rounded-jpm">
+          <div className="p-2 bg-white/20 rounded-jpb">
             <Bot size={18} className="text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Hestia AI Assistant</h3>
+            <h3 className="text-sm font-semibold text-white">A tia AI Assistant</h3>
             <p className="text-xs text-white/70">JPM ERP</p>
           </div>
         </div>
@@ -88,31 +94,42 @@ const AIChatWidget: React.FC = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ minHeight: '20rem' }}>
+      <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ minHeight: "20rem" }}>
         {messages.map((msg) => (
-          <div key={msg.id} className={"flex " + (msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+          <div key={msg.id} className={"flex " + (msg.role === "user" ? "justify-end" : "justify-start")}>
             <div className={"max-w-[85%] px-3.5 py-2.5 rounded-jpm-md text-sm " +
-              (msg.role === 'user'
-                ? 'bg-jpm-red text-white rounded-br-jpm-lg'
-                : 'bg-bg-elevated text-text-primary border border-border')
+              (msg.role === "user"
+                ? "bg-jpm-red text-white rounded-br-jpm-lg"
+                : "bg-bg-elevated text-text-primary border border-border rounded-bl-jpm-lg")
             }>
-              <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-              <p className={"text-[10px] mt-1 " + (msg.role === 'user' ? 'text-white/60' : 'text-text-muted')}>
-                {msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+              {msg.loading ? (
+                <div className="flex items-center gap-2 text-text-muted">
+                  <Loader2 size={14} className="animate-spin" />
+                  <span className="text-xs">A tia berpikir</span>
+                </div>
+              ) : (
+                <div className="markdown-content">
+                  <ReactMarkdown
+                    components={{
+                      p: ({children}) => <p className="mb-1 last:mb-0">{children}</p>,
+                      ul: ({children}) => <ul className="list-disc ml-4 mb-1">{children}</ul>,
+                      ol: ({children}) => <ol className="list-decimal ml-4 mb-1">{children}</ol>,
+                      li: ({children}) => <li className="text-sm">{children}</li>,
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                      code: ({ children }) => <code className="bg-bg-page px-1 py-0.5 rounded text-xs">{children}</code>,
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
+              )}
+              <p className={"text-[10px] mt-1 " + (msg.role === "user" ? "text-white/60" : "text-text-muted")}>
+                {msg.timestamp.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
               </p>
             </div>
           </div>
         ))}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-bg-elevated border border-border px-3.5 py-2.5 rounded-jpm-md">
-              <div className="flex items-center gap-2 text-text-muted">
-                <Loader2 size={14} className="animate-spin" />
-                <span className="text-xs">Berpikir...</span>
-              </div>
-            </div>
-          </div>
-        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -126,7 +143,7 @@ const AIChatWidget: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ketik pesan..."
-            className="flex-1 px-3 py-2 text-sm bg-bg-page border border-border rounded-jpm-md text-text-primary placeholder:text-text-muted focus:outline-none focus:border-jpm-red focus:ring-1 focus:ring-jpm-red/20 transition-colors"
+            className="flex-1 px-3 py-2 text-sm bg-bg-page border border-border rounded-jpm-md text-text-primary placeholder:text-text-muted focus:outline-none focus:border-jpm-red focus:ring-1 focus:ring-jpm-red/20 transition-colors disabled:opacity-50"
             disabled={loading}
           />
           <button
