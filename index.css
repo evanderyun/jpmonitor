@@ -1,32 +1,32 @@
 @import "tailwindcss";
 
 @theme {
-  --radius-jpm: 4px;
-  --radius-jpm-md: 6px;
-  --radius-jpm-lg: 8px;
+  --radius-jpmonitor: 4px;
+  --radius-jpmonitor-md: 6px;
+  --radius-jpmonitor-lg: 8px;
   --radius-pill: 9999px;
   --font-sans: "Inter Variable", "SF Pro Display", system-ui, sans-serif;
   --font-mono: "Source Code Pro", "SFMono-Regular", monospace;
 }
 
 /* ============================================================
-   JPM ERP Custom Utilities
+   jpmonitor Custom Utilities
    Brand colors defined here for Tailwind v4 compatibility
    ============================================================ */
-.bg-jpm-red { background-color: #dc2626; }
-.hover\:bg-jpm-red-hover:hover { background-color: #ef4444; }
-.text-jpm-red { color: #dc2626; }
-.border-jpm-red { border-color: #dc2626; }
-.focus\:ring-jpm-red:focus { --tw-ring-color: #dc2626; }
-.bg-jpm-red-subtle { background-color: #fef2f2; }
-.dark .dark\:bg-jpm-red-subtle { background-color: rgba(220,38,38,0.15); }
+.bg-jpmonitor-red { background-color: #dc2626; }
+.hover\:bg-jpmonitor-red-hover:hover { background-color: #ef4444; }
+.text-jpmonitor-red { color: #dc2626; }
+.border-jpmonitor-red { border-color: #dc2626; }
+.focus\:ring-jpmonitor-red:focus { --tw-ring-color: #dc2626; }
+.bg-jpmonitor-red-subtle { background-color: #fef2f2; }
+.dark .dark\:bg-jpmonitor-red-subtle { background-color: rgba(220,38,38,0.15); }
 .dark .dark\:focus\:ring-offset-bg-page { --tw-ring-offset-color: #08090a; }
 
 /* ============================================================
    CSS Custom Properties - Light Mode (default)
    ============================================================ */
 /* ============================================================
-   JPM ERP Custom Utilities - for Tailwind v4 compatibility
+   jpmonitor Custom Utilities - for Tailwind v4 compatibility
    ============================================================ */
 
 /* Background colors */
@@ -52,16 +52,16 @@
 .hover\:border-border-hover:hover { border-color: var(--border-hover, var(--border)); }
 
 /* Brand colors */
-.bg-jpm-red { background-color: #dc2626; }
-.hover\:bg-jpm-red-hover:hover { background-color: #ef4444; }
-.text-jpm-red { color: #dc2626; }
-.border-jpm-red { border-color: #dc2626; }
-.focus\:ring-jpm-red:focus { --tw-ring-color: #dc2626; }
-.bg-jpm-red-subtle { background-color: #fef2f2; }
-.dark .dark\:bg-jpm-red-subtle { background-color: rgba(220,38,38,0.15); }
-.hover\:text-jpm-red:hover { color: #dc2626; }
-.hover\:bg-jpm-red-subtle:hover { background-color: #fef2f2; }
-.dark .dark\:hover\:bg-jpm-red-subtle:hover { background-color: rgba(220,38,38,0.15); }
+.bg-jpmonitor-red { background-color: #dc2626; }
+.hover\:bg-jpmonitor-red-hover:hover { background-color: #ef4444; }
+.text-jpmonitor-red { color: #dc2626; }
+.border-jpmonitor-red { border-color: #dc2626; }
+.focus\:ring-jpmonitor-red:focus { --tw-ring-color: #dc2626; }
+.bg-jpmonitor-red-subtle { background-color: #fef2f2; }
+.dark .dark\:bg-jpmonitor-red-subtle { background-color: rgba(220,38,38,0.15); }
+.hover\:text-jpmonitor-red:hover { color: #dc2626; }
+.hover\:bg-jpmonitor-red-subtle:hover { background-color: #fef2f2; }
+.dark .dark\:hover\:bg-jpmonitor-red-subtle:hover { background-color: rgba(220,38,38,0.15); }
 .dark .dark\:focus\:ring-offset-bg-page { --tw-ring-offset-color: #08090a; }
 
 /* Status colors */
@@ -73,9 +73,9 @@
 .text-warning { color: var(--warning); }
 
 :root {
-  --jpm-red: #dc2626;
-  --jpm-red-hover: #ef4444;
-  --jpm-red-subtle: #fef2f2;
+  --jpmonitor-red: #dc2626;
+  --jpmonitor-red-hover: #ef4444;
+  --jpmonitor-red-subtle: #fef2f2;
   --bg-page: #f7f8f8;
   --bg-panel: #ffffff;
   --bg-surface: #ffffff;
@@ -130,7 +130,7 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid var(--jpm-red);
+  outline: 2px solid var(--jpmonitor-red);
   outline-offset: 2px;
   border-radius: 4px;
 }

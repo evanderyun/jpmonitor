@@ -7,8 +7,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 MAX_TURNS = "5"
 ENV = os.environ.copy()
-ENV["HOME"] = "/home/hermes"
-ENV["PATH"] = "/home/hermes/.hermes/hermes-agent/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ENV["HOME"] = "/home/jpmonitor"
+ENV["PATH"] = "/home/jpmonitor/.hermes/hermes-agent/venv/bin:/usr/local/bin:/usr/bin:/bin"
 ENV["PYTHONUNBUFFERED"] = "1"
 
 def clean_output(raw):
@@ -54,7 +54,7 @@ class HestiaHandler(BaseHTTPRequestHandler):
             return
 
         cmd = [
-            "/home/hermes/.hermes/hermes-agent/venv/bin/python",
+            "/home/jpmonitor/.hermes/hermes-agent/venv/bin/python",
             "-m", "hermes_cli.main",
             "chat",
             "-q", message,
@@ -68,7 +68,7 @@ class HestiaHandler(BaseHTTPRequestHandler):
                 capture_output=True,
                 text=True,
                 timeout=120,
-                cwd="/home/hermes",
+                cwd="/home/jpmonitor",
                 env=ENV
             )
 

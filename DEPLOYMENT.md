@@ -1,6 +1,6 @@
-# Deployment Guide - JPM ERP System
+# Deployment Guide - jpmonitor System
 
-This guide outlines the steps to deploy the JPM ERP System (Spring Boot Backend + React Frontend) to a production environment.
+This guide outlines the steps to deploy the jpmonitor System (Spring Boot Backend + React Frontend) to a production environment.
 
 ## Prerequisites
 
@@ -48,9 +48,9 @@ java -jar api/target/api-0.0.1-SNAPSHOT.jar
 For production, override default settings using environment variables:
 
 ```bash
-export SPRING_DATASOURCE_URL=jdbc:postgresql://prod-db-host:5432/jpm_db
-export SPRING_DATASOURCE_USERNAME=prod_user
-export SPRING_DATASOURCE_PASSWORD=prod_password
+export SPRING_DATASOURCE_URL=jdbc:postgresql://db-host:5432/jpm_db
+export SPRING_DATASOURCE_USERNAME=${DB_USER}
+export SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
 java -jar api/target/api-0.0.1-SNAPSHOT.jar
 ```
 
@@ -83,9 +83,9 @@ You can serve the `dist/` folder using any web server (Nginx, Apache, or a simpl
 ```nginx
 server {
     listen 80;
-    server_name erp.jpm.com;
+    server_name erp.example.com;
 
-    root /var/www/jpm-erp/dist;
+    root /var/www/jpmonitor/dist;
     index index.html;
 
     # Handle React Router (SPA)

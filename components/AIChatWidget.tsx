@@ -13,7 +13,7 @@ interface Message {
 const AIChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: "1", role: "assistant", content: "Halo! Saya Hestia, asisten AI JPM ERP. Ada yang bisa saya bantu?", timestamp: new Date() }
+    { id: "1", role: "assistant", content: "Halo! Saya Hestia, asisten AI jpmonitor. Ada yang bisa saya bantu?", timestamp: new Date() }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -66,7 +66,7 @@ const AIChatWidget: React.FC = () => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 p-4 bg-jpm-red text-white rounded-pill shadow-elevated hover:bg-jpm-red-hover transition-colors z-50 flex items-center gap-2"
+        className="fixed bottom-6 right-6 p-4 bg-jpmonitor-red text-white rounded-pill shadow-elevated hover:bg-jpmonitor-red-hover transition-colors z-50 flex items-center gap-2"
         aria-label="Open AI Assistant"
       >
         <MessageSquare size={20} />
@@ -78,17 +78,17 @@ const AIChatWidget: React.FC = () => {
   return (
     <div className="fixed bottom-6 right-6 w-96 bg-bg-surface border border-border rounded-jpa-xl shadow-elevated z-50 flex flex-col" style={{ maxHeight: "32rem" }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-jpm-red rounded-t-jpm-xl">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-jpmonitor-red rounded-t-jpmonitor-xl">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-white/20 rounded-jpb">
             <Bot size={18} className="text-white" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white">A tia AI Assistant</h3>
-            <p className="text-xs text-white/70">JPM ERP</p>
+            <p className="text-xs text-white/70">jpmonitor</p>
           </div>
         </div>
-        <button onClick={() => setIsOpen(false)} className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-jpm transition-colors" aria-label="Close chat">
+        <button onClick={() => setIsOpen(false)} className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-jpmonitor transition-colors" aria-label="Close chat">
           <X size={16} />
         </button>
       </div>
@@ -97,10 +97,10 @@ const AIChatWidget: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ minHeight: "20rem" }}>
         {messages.map((msg) => (
           <div key={msg.id} className={"flex " + (msg.role === "user" ? "justify-end" : "justify-start")}>
-            <div className={"max-w-[85%] px-3.5 py-2.5 rounded-jpm-md text-sm " +
+            <div className={"max-w-[85%] px-3.5 py-2.5 rounded-jpmonitor-md text-sm " +
               (msg.role === "user"
-                ? "bg-jpm-red text-white rounded-br-jpm-lg"
-                : "bg-bg-elevated text-text-primary border border-border rounded-bl-jpm-lg")
+                ? "bg-jpmonitor-red text-white rounded-br-jpmonitor-lg"
+                : "bg-bg-elevated text-text-primary border border-border rounded-bl-jpmonitor-lg")
             }>
               {msg.loading ? (
                 <div className="flex items-center gap-2 text-text-muted">
@@ -143,13 +143,13 @@ const AIChatWidget: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ketik pesan..."
-            className="flex-1 px-3 py-2 text-sm bg-bg-page border border-border rounded-jpm-md text-text-primary placeholder:text-text-muted focus:outline-none focus:border-jpm-red focus:ring-1 focus:ring-jpm-red/20 transition-colors disabled:opacity-50"
+            className="flex-1 px-3 py-2 text-sm bg-bg-page border border-border rounded-jpmonitor-md text-text-primary placeholder:text-text-muted focus:outline-none focus:border-jpmonitor-red focus:ring-1 focus:ring-jpmonitor-red/20 transition-colors disabled:opacity-50"
             disabled={loading}
           />
           <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
-            className="p-2 bg-jpm-red text-white rounded-jpm-md hover:bg-jpm-red-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 bg-jpmonitor-red text-white rounded-jpmonitor-md hover:bg-jpmonitor-red-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Send message"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}

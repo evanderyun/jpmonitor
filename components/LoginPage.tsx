@@ -13,7 +13,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("jpm-dark-mode");
+      const stored = localStorage.getItem("jpmonitor-dark-mode");
       if (stored !== null) return stored === "true";
       return window.matchMedia("(prefers-color-scheme: dark)").matches;
     }
@@ -22,7 +22,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("jpm-dark-mode", String(darkMode));
+    localStorage.setItem("jpmonitor-dark-mode", String(darkMode));
   }, [darkMode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,7 +42,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   return (
     <div className="min-h-screen flex bg-bg-page text-text-secondary transition-colors duration-300">
       {/* Left Panel - JPM Brand */}
-      <div className="hidden lg:flex lg:w-1/2 bg-jpm-red flex-col items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-jpmonitor-red flex-col items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-12 left-12 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-12 right-12 w-72 h-72 bg-black rounded-full blur-3xl"></div>
@@ -57,7 +57,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             Enterprise Resource Planning
           </h1>
           <p className="text-white/70 text-lg font-light leading-relaxed">
-            PT Java Persada Mandiri
+            JpMonitor
           </p>
           <div className="mt-12 flex items-center justify-center gap-3 text-white/50 text-sm">
             <Shield size={16} />
@@ -83,7 +83,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <div className="w-full max-w-sm">
             {/* Mobile Logo */}
             <div className="lg:hidden flex items-center mb-8">
-              <span className="text-jpm-red font-black text-4xl tracking-tighter">
+              <span className="text-jpmonitor-red font-black text-4xl tracking-tighter">
                 J<span className="text-text-muted">P</span>M
               </span>
             </div>
@@ -99,9 +99,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="flex items-start gap-3 p-4 bg-jpm-red-subtle border border-status-success-border rounded-jpm">
-                  <AlertCircle size={18} className="text-jpm-red flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-jpm-red">{error}</p>
+                <div className="flex items-start gap-3 p-4 bg-jpmonitor-red-subtle border border-status-success-border rounded-jpmonitor">
+                  <AlertCircle size={18} className="text-jpmonitor-red flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-jpmonitor-red">{error}</p>
                 </div>
               )}
 
@@ -114,7 +114,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 border border-border rounded-jpm bg-bg-surface text-text-primary transition-all duration-200 focus:border-jpm-red focus:ring-2 focus:ring-jpm-red/20 focus:outline-none placeholder:text-text-muted"
+                  className="w-full px-4 py-3 border border-border rounded-jpmonitor bg-bg-surface text-text-primary transition-all duration-200 focus:border-jpmonitor-red focus:ring-2 focus:ring-jpmonitor-red/20 focus:outline-none placeholder:text-text-muted"
                   placeholder="Enter your username"
                   required
                   disabled={loading}
@@ -131,7 +131,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-border rounded-jpm bg-bg-surface text-text-primary transition-all duration-200 focus:border-jpm-red focus:ring-2 focus:ring-jpm-red/20 focus:outline-none placeholder:text-text-muted"
+                  className="w-full px-4 py-3 border border-border rounded-jpmonitor bg-bg-surface text-text-primary transition-all duration-200 focus:border-jpmonitor-red focus:ring-2 focus:ring-jpmonitor-red/20 focus:outline-none placeholder:text-text-muted"
                   placeholder="Enter your password"
                   required
                   disabled={loading}
@@ -142,7 +142,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-jpm-red hover:bg-jpm-red-hover text-white font-medium py-3 px-4 rounded-jpm transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-jpm-red focus:ring-offset-2 dark:focus:ring-offset-bg-page"
+                className="w-full bg-jpmonitor-red hover:bg-jpmonitor-red-hover text-white font-medium py-3 px-4 rounded-jpmonitor transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-jpmonitor-red focus:ring-offset-2 dark:focus:ring-offset-bg-page"
               >
                 {loading ? (
                   <>
@@ -160,7 +160,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
             <div className="mt-8 pt-6 border-t border-border">
               <p className="text-xs text-text-muted text-center">
-                &copy; {new Date().getFullYear()} PT Java Persada Mandiri. All rights reserved.
+                &copy; {new Date().getFullYear()} JpMonitor. All rights reserved.
               </p>
             </div>
           </div>

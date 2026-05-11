@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: jpm-erp-backend
+    name: jpmonitor-backend
 
   # Virtual Threads (Project Loom)
   threads:
@@ -14,9 +14,9 @@ spring:
     property-naming-strategy: SNAKE_CASE
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:jpm_db}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:jpmonitor_db}
     username: ${DB_USER:jpm_user}
-    password: ${DB_PASSWORD:jpm_password}
+    password: ${DB_PASSWORD:jpmonitor_password}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -52,7 +52,7 @@ jwt:
 # CORS Configuration
 app:
   cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://jpm-erp.duckdns.org}
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://jpmonitor.duckdns.org}
 
 # Actuator (health checks)
 management:
@@ -68,7 +68,7 @@ management:
 logging:
   level:
     root: WARN
-    com.jpm.erp: INFO
+    com.jpmonitor: INFO
     org.hibernate.SQL: WARN
     org.springframework.security: WARN
   pattern:

@@ -3,8 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>jpm-erp-backend</artifactId>
-        <groupId>com.jpm.erp</groupId>
+        <artifactId>jpmonitor-backend</artifactId>
+        <groupId>com.jpmonitor</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -12,12 +12,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.jpm.erp</groupId>
+            <groupId>com.jpmonitor</groupId>
             <artifactId>platform</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.jpm.erp</groupId>
+            <groupId>com.jpmonitor</groupId>
             <artifactId>domains</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -55,7 +55,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.jpm.erp.api.JpmErpApplication</mainClass>
+                    <mainClass>com.jpmonitor.api.JpmErpApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

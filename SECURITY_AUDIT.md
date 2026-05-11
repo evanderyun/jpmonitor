@@ -1,4 +1,4 @@
-# Security Audit & Readiness Report - PT Java Persada Mandiri ERP
+# Security Audit & Readiness Report - JpMonitor ERP
 
 **Date:** November 29, 2025
 **Auditor:** Gemini Agent

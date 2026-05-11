@@ -10,7 +10,7 @@
 
 console.log("🔍 Exporting LocalStorage Data...");
 
-const dbKey = 'jpm-database';
+const dbKey = 'jpmonitor-database';
 const rawData = localStorage.getItem(dbKey);
 
 if (!rawData) {
@@ -46,7 +46,7 @@ if (!rawData) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `jpm-migration-${Date.now()}.json`;
+        a.download = `jpmonitor-migration-${Date.now()}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

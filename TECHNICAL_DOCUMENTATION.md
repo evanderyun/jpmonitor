@@ -1,4 +1,4 @@
-# PT Java Persada Mandiri ERP - Technical Documentation
+# JpMonitor ERP - Technical Documentation
 
 **Version:** 2.0
 **Last Updated:** November 29, 2025

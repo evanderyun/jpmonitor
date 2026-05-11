@@ -3,7 +3,7 @@
  * Provides type-safe storage operations with error handling
  */
 
-const STORAGE_KEY = 'jpm_erp_database';
+const STORAGE_KEY = 'jpmonitor_database';
 const STORAGE_VERSION = '1.0';
 
 export interface StorageData {

@@ -9,12 +9,12 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     
-    <groupId>com.jpm.erp</groupId>
-    <artifactId>jpm-erp-backend</artifactId>
+    <groupId>com.jpmonitor</groupId>
+    <artifactId>jpmonitor-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>JPM ERP Backend</name>
-    <description>Enterprise ERP System for PT Java Persada Mandiri</description>
+    <name>jpmonitor Backend</name>
+    <description>ERP System by JpMonitor</description>
 
     <modules>
         <module>platform</module>

@@ -29,7 +29,7 @@ async function runVerification() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 username: 'admin',
-                password: 'admin123' 
+                password: 'CHANGE_ME' 
             })
         });
 
@@ -84,7 +84,7 @@ async function runVerification() {
     console.log(`\n${colors.yellow}3. Verifying Database Persistence (Direct SQL)...${colors.reset}`);
     try {
         // We use psql to check if the data actually exists on disk
-        const { stdout } = await execPromise(`PGPASSWORD=jpm_password psql -h localhost -U jpm_user -d jpm_db -c "SELECT id, name, code FROM locations WHERE code = '${testLocationCode}';"`);
+        const { stdout } = await execPromise(`PGPASSWORD=test_password psql -h localhost -U jpmonitor_user -d jpmonitor_db -c "SELECT id, name, code FROM locations WHERE code = '${testLocationCode}';"`);
         
         if (stdout.includes(testLocationCode)) {
             console.log(`${colors.green}   ✅ Data found in PostgreSQL!${colors.reset}`);
@@ -121,7 +121,7 @@ async function runVerification() {
     // 5. CLEANUP
     console.log(`\n${colors.yellow}5. Cleaning up Test Data...${colors.reset}`);
     try {
-        await execPromise(`PGPASSWORD=jpm_password psql -h localhost -U jpm_user -d jpm_db -c "DELETE FROM locations WHERE code = '${testLocationCode}';"`);
+        await execPromise(`PGPASSWORD=test_password psql -h localhost -U jpmonitor_user -d jpmonitor_db -c "DELETE FROM locations WHERE code = '${testLocationCode}';"`);
         console.log(`${colors.green}   ✅ Test data cleaned up.${colors.reset}`);
     } catch (error) {
         console.warn(`${colors.yellow}   ⚠️ Cleanup failed, manual check required.${colors.reset}`);

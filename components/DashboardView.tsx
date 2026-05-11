@@ -32,8 +32,8 @@ const DashboardView: React.FC = () => {
   if (error) {
     return (
       <div className="p-8 text-center">
-        <div className="text-jpm-red mb-2">{error}</div>
-        <button onClick={loadData} className="text-jpm-red underline">Retry</button>
+        <div className="text-jpmonitor-red mb-2">{error}</div>
+        <button onClick={loadData} className="text-jpmonitor-red underline">Retry</button>
       </div>
     );
   }
@@ -54,7 +54,7 @@ const DashboardView: React.FC = () => {
         title="Executive Dashboard"
         subtitle="Real-time operational intelligence and KPIs"
         action={
-          <button onClick={loadData} className="p-2 border border-border rounded-jpm hover:bg-bg-elevated transition-colors text-text-muted" title="Refresh">
+          <button onClick={loadData} className="p-2 border border-border rounded-jpmonitor hover:bg-bg-elevated transition-colors text-text-muted" title="Refresh">
             <RefreshCw size={16} />
           </button>
         }
@@ -123,14 +123,14 @@ const DashboardView: React.FC = () => {
               </div>
             ) : (
               lowStockItems.map((item: any) => (
-                <div key={item.id} className="bg-jpm-red-subtle border border-jpm-red/30 p-3 rounded-jpm">
+                <div key={item.id} className="bg-jpmonitor-red-subtle border border-jpmonitor-red/30 p-3 rounded-jpmonitor">
                   <div className="flex justify-between items-start mb-1">
                     <p className="text-sm font-medium text-text-primary">{item.name}</p>
-                    <span className="text-xs font-mono text-jpm-red font-bold">{item.currentStock} {item.unit}</span>
+                    <span className="text-xs font-mono text-jpmonitor-red font-bold">{item.currentStock} {item.unit}</span>
                   </div>
                   <p className="text-xs text-text-muted mb-2">Min: {item.minStockLevel} - {item.partNumber}</p>
-                  <div className="w-full bg-jpm-red/20 rounded-full h-1.5">
-                    <div className="bg-jpm-red h-1.5 rounded-full" style={{ width: Math.min((item.currentStock / item.minStockLevel) * 100, 100) + '%' }}></div>
+                  <div className="w-full bg-jpmonitor-red/20 rounded-full h-1.5">
+                    <div className="bg-jpmonitor-red h-1.5 rounded-full" style={{ width: Math.min((item.currentStock / item.minStockLevel) * 100, 100) + '%' }}></div>
                   </div>
                 </div>
               ))

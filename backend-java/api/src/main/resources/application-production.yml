@@ -8,7 +8,7 @@ spring:
 logging:
   level:
     root: WARN
-    com.jpm.erp: WARN
+    com.jpmonitor: WARN
     org.springframework.security: WARN
 
 # Disable Swagger in production

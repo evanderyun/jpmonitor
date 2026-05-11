@@ -1,17 +1,17 @@
-# JPM ERP Design System
+# brandonitor Design System
 
-> Based on Linear.app design system, adapted for JPM brand with RED primary accent.
+> Based on Linear.app design system, adapted for brand brand with RED primary accent.
 > Supports both light mode and dark mode with natural color transitions.
 > Single source of truth for all UI components.
 
 ## 1. Visual Theme & Atmosphere
 
-Dark-mode-first canvas where content emerges through luminance gradations. Single brand accent: JPM Red replaces Linear indigo.
+Dark-mode-first canvas where content emerges through luminance gradations. Single brand accent: brand Red replaces Linear indigo.
 
 **Key Characteristics:**
 - Dark: #08090a canvas, #0f1011 panels, #191a1b elevated surfaces
 - Light: #f7f8f8 canvas, #ffffff cards, #e5e7eb borders
-- Brand: JPM Red #dc2626 (replaces Linear indigo #5e6ad2)
+- Brand: brand Red #dc2626 (replaces Linear indigo #5e6ad2)
 - Font: Inter Variable with cv01, ss03 globally, weight 510 as signature
 - Borders: semi-transparent (dark) or solid subtle (light)
 
@@ -30,9 +30,9 @@ Dark-mode-first canvas where content emerges through luminance gradations. Singl
 | --text-quaternary | #62666d | Disabled, timestamps |
 | --border | rgba(255,255,255,0.08) | Card borders |
 | --border-subtle | rgba(255,255,255,0.05) | Dividers |
-| --jpm-red | #dc2626 | Primary CTA, accents |
-| --jpm-red-hover | #ef4444 | Hover states |
-| --jpm-red-subtle | rgba(220,38,38,0.15) | Error/brand surfaces |
+| --brand-red | #dc2626 | Primary CTA, accents |
+| --brand-red-hover | #ef4444 | Hover states |
+| --brand-red-subtle | rgba(220,38,38,0.15) | Error/brand surfaces |
 
 ### Light Mode
 | Token | Value | Usage |
@@ -47,9 +47,9 @@ Dark-mode-first canvas where content emerges through luminance gradations. Singl
 | --text-quaternary | #cbd5e1 | Disabled, timestamps |
 | --border | #e2e8f0 | Card borders |
 | --border-subtle | #f1f5f9 | Dividers |
-| --jpm-red | #dc2626 | Primary CTA, accents (same) |
-| --jpm-red-hover | #ef4444 | Hover states (same) |
-| --jpm-red-subtle | #fef2f2 | Error/brand surfaces |
+| --brand-red | #dc2626 | Primary CTA, accents (same) |
+| --brand-red-hover | #ef4444 | Hover states (same) |
+| --brand-red-subtle | #fef2f2 | Error/brand surfaces |
 
 ### Status Colors
 | Token | Dark | Light | Usage |
@@ -86,8 +86,8 @@ Dark-mode-first canvas where content emerges through luminance gradations. Singl
 |------|-----------|------|--------|--------|
 | Ghost (dark) | rgba(255,255,255,0.02) | #e2e4e7 | 1px solid rgba(255,255,255,0.08) | 6px |
 | Ghost (light) | transparent | #0f172a | 1px solid #e2e8f0 | 6px |
-| Primary | var(--jpm-red) | #ffffff | none | 6px |
-| Primary Hover | var(--jpm-red-hover) | #ffffff | none | 6px |
+| Primary | var(--brand-red) | #ffffff | none | 6px |
+| Primary Hover | var(--brand-red-hover) | #ffffff | none | 6px |
 
 ### Cards
 | Token | Dark | Light |
@@ -103,7 +103,7 @@ Dark-mode-first canvas where content emerges through luminance gradations. Singl
 |----------|------|-------|
 | Background | rgba(255,255,255,0.02) | #ffffff |
 | Border | 1px solid rgba(255,255,255,0.08) | 1px solid #e2e8f0 |
-| Focus Border | 1px solid var(--jpm-red) | 1px solid var(--jpm-red) |
+| Focus Border | 1px solid var(--brand-red) | 1px solid var(--brand-red) |
 | Radius | 6px | 6px |
 
 ### Badges / Pills
@@ -150,7 +150,7 @@ Scale: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96
 ## 8. Do and Dont
 
 ### Do
-- Use var(--jpm-red) as primary brand accent
+- Use var(--brand-red) as primary brand accent
 - Use Inter Variable with cv01, ss03 globally
 - Use weight 510 as default emphasis
 - Dark mode is native default, light mode is opt-in toggle
@@ -158,7 +158,7 @@ Scale: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96
 - Shadows for elevation in light mode
 
 ### Dont
-- Dont use purple/indigo - JPM brand is RED
+- Dont use purple/indigo - brand brand is RED
 - Dont use pure white/black text
 - Dont use warm colors in chrome
 - Dont use positive letter-spacing at display sizes

@@ -11,7 +11,7 @@ interface NavProps {
 const Navigation: React.FC<NavProps> = ({ activeTab, setActiveTab, currentUser, onLogout }) => {
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('jpm-dark-mode');
+      const stored = localStorage.getItem('jpmonitor-dark-mode');
       if (stored !== null) return stored === 'true';
       return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
@@ -20,7 +20,7 @@ const Navigation: React.FC<NavProps> = ({ activeTab, setActiveTab, currentUser, 
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('jpm-dark-mode', String(darkMode));
+    localStorage.setItem('jpmonitor-dark-mode', String(darkMode));
   }, [darkMode]);
 
   const menuItems = [
@@ -44,16 +44,16 @@ const Navigation: React.FC<NavProps> = ({ activeTab, setActiveTab, currentUser, 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex font-black text-2xl tracking-tighter leading-none">
-              <span className="text-jpm-red">J</span>
-              <span className="text-jpm-red transform translate-y-1">P</span>
-              <span className="text-jpm-red">M</span>
+              <span className="text-jpmonitor-red">J</span>
+              <span className="text-jpmonitor-red transform translate-y-1">P</span>
+              <span className="text-jpmonitor-red">M</span>
             </div>
             <div>
-              <h1 className="text-xs font-semibold text-text-primary leading-tight">JPM ERP</h1>
+              <h1 className="text-xs font-semibold text-text-primary leading-tight">jpmonitor</h1>
               <p className="text-[10px] text-text-muted uppercase tracking-wider">Mining Operations</p>
             </div>
           </div>
-          <button onClick={() => setDarkMode(!darkMode)} className="p-1.5 rounded-jpm border border-border hover:bg-bg-elevated transition-colors text-text-muted" aria-label="Toggle dark mode">
+          <button onClick={() => setDarkMode(!darkMode)} className="p-1.5 rounded-jpmonitor border border-border hover:bg-bg-elevated transition-colors text-text-muted" aria-label="Toggle dark mode">
             {darkMode ? <Sun size={14} /> : <Moon size={14} />}
           </button>
         </div>
@@ -65,8 +65,8 @@ const Navigation: React.FC<NavProps> = ({ activeTab, setActiveTab, currentUser, 
           const isActive = activeTab === item.id;
           return (
             <button key={item.id} onClick={() => setActiveTab(item.id)} className={
-              'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-jpm-md transition-all duration-200 ' +
-              (isActive ? 'bg-jpm-red text-white font-medium' : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary')
+              'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-jpmonitor-md transition-all duration-200 ' +
+              (isActive ? 'bg-jpmonitor-red text-white font-medium' : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary')
             }>
               <Icon size={16} className="flex-shrink-0" />
               <span className="truncate">{item.label}</span>
@@ -83,7 +83,7 @@ const Navigation: React.FC<NavProps> = ({ activeTab, setActiveTab, currentUser, 
           </div>
         )}
         {onLogout && (
-          <button onClick={onLogout} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-muted hover:text-jpm-red hover:bg-jpm-red-subtle rounded-jpm-md transition-colors">
+          <button onClick={onLogout} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-muted hover:text-jpmonitor-red hover:bg-jpmonitor-red-subtle rounded-jpmonitor-md transition-colors">
             <LogOut size={16} />
             <span>Sign Out</span>
           </button>

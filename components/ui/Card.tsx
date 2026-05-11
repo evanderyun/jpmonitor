@@ -8,7 +8,7 @@ interface CardProps {
 }
 
 export const Card: React.FC<CardProps> = ({ children, className = '', hover = true, elevated = false }) => {
-  const baseClass = 'bg-bg-surface border border-border rounded-jpm-lg';
+  const baseClass = 'bg-bg-surface border border-border rounded-jpmonitor-lg';
   const shadowClass = elevated ? 'shadow-elevated' : 'shadow-card';
   const hoverClass = hover ? 'hover:shadow-card-hover transition-all duration-200' : '';
 
@@ -46,7 +46,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, trend, c
           )}
         </div>
         {icon && (
-          <div className="p-3 bg-jpm-red-subtle rounded-jpm text-jpm-red">
+          <div className="p-3 bg-jpmonitor-red-subtle rounded-jpmonitor text-jpmonitor-red">
             {icon}
           </div>
         )}
@@ -65,7 +65,7 @@ export const Badge: React.FC<BadgeProps> = ({ children, variant = 'neutral', cla
   const variants: Record<string, string> = {
     success: 'bg-status-success-bg text-status-success border border-status-success-border',
     warning: 'bg-warning/10 text-warning border border-warning/30',
-    error: 'bg-jpm-red-subtle text-jpm-red border border-jpm-red/30',
+    error: 'bg-jpmonitor-red-subtle text-jpmonitor-red border border-jpmonitor-red/30',
     neutral: 'bg-bg-elevated text-text-secondary border border-border',
   };
 

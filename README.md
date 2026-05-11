@@ -2,100 +2,111 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# PT Java Persada Mandiri ERP System
+# JpMonitor
 
-Complete ERP system for mining operations with **automatic data persistence**.
+ERP system for mining operations — fleet, inventory, production, HR, and HSE management.
 
-> **✅ Data Persistence Enabled**: All your data is automatically saved to browser localStorage and persists across page refreshes!
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Backend** | Java 21, Spring Boot 3, Virtual Threads |
+| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4 |
+| **Database** | PostgreSQL 16, Flyway migrations |
+| **Auth** | JWT (JJWT), Spring Security, role-based (RBAC) |
+| **Deploy** | Docker Compose, Nginx reverse proxy |
+| **AI** | AI Chat Widget via Hestia agent framework |
 
 ## Features
 
-- 📊 **Fleet Management** - Equipment tracking, maintenance, work orders
-- 📦 **Inventory Management** - Spare parts, transactions, stock control
-- 👥 **Employee Management** - Staff records, timesheets
-- 🚚 **Logistics** - Asset mutations, goods shipments
-- 📈 **Production Tracking** - Daily production records, analytics
-- 🔒 **Audit Trail** - Complete transaction history
-- 💾 **Auto-Save** - All changes automatically saved (no manual save needed!)
+- 🚛 **Fleet Management** — Equipment tracking, maintenance records, work orders, fuel logs
+- 📦 **Inventory** — Spare parts, inventory transactions, stock control
+- ⛏️ **Production** — Daily production records, stockpile, pit, coal quality
+- 👥 **HR** — Employee records, timesheets
+- 🚚 **Logistics** — Goods shipments, shipment items
+- 🛒 **Procurement** — Suppliers, external services, price history
+- 🛡️ **HSE** — Incident reporting, investigations
+- 💰 **Finance** — Accounts payable, cash accounts, cost categories
+- 📊 **Dashboard** — Fleet stats, inventory alerts, production overview
+- 🤖 **AI Chat** — Embedded agent for queries and assistance
+- 🔒 **Audit Trail** — Full transaction logging
+- 🌙 **Dark Mode** — Full dark mode support
 
-## Run Locally
+## Quick Start
 
-**Prerequisites:** Node.js 18+
+### Prerequisites
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+- Docker + Docker Compose
+- Java 21 (for local dev)
+- Node.js 18+ (for frontend dev)
 
-2. **Set the Gemini API key** (optional, for AI features):
-   Edit [.env.local](.env.local):
-   ```
-   GEMINI_API_KEY=your_actual_api_key_here
-   ```
+### Docker (recommended)
 
-3. **Run the app:**
-   ```bash
-   npm run dev
-   ```
-   
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+```bash
+# Clone and start
+git clone https://github.com/evanderyun/jpmonitor.git
+cd jpmonitor
 
-## Data Persistence
+# Configure environment
+cp .env.example .env
+# Edit .env — set DB_PASSWORD and JWT_SECRET
 
-### How It Works
-
-- **Auto-Save**: All data changes are automatically saved to browser localStorage
-- **Auto-Load**: Data is automatically loaded when you open the app
-- **No Data Loss**: Refresh the page anytime - your data persists!
-- **Storage Size**: Currently ~11 KB (well below browser limits)
-
-### Storage Information
-
-Check storage stats in browser console:
-```javascript
-db.getStorageInfo()
-// Returns: { exists: true, size: "11.04 KB", timestamp: "...", age: "..." }
+# Start all services
+docker compose up -d
 ```
 
-### Reset Data
+Services:
+- **Frontend** → http://localhost:3002
+- **Backend API** → http://localhost:8080/api
+- **PostgreSQL** → localhost:5436
 
-To reset all data to initial seed data:
-```javascript
-db.resetToSeedData()  // Clears localStorage and reloads page
+### Local Development
+
+```bash
+# Backend
+cd backend-java
+mvn spring-boot:run
+
+# Frontend
+npm install
+npm run dev
 ```
 
-Or manually clear via DevTools:
-1. Open DevTools (F12)
-2. Application → Local Storage
-3. Delete `jpm_erp_database` key
-4. Refresh page
+## Environment Variables
 
-## Limitations
+```bash
+DB_HOST=jpmonitor-postgres
+DB_PORT=5432
+DB_NAME=jpmonitor_db
+DB_USER=jpmonitor_user
+DB_PASSWORD=CHANGE_ME
+JWT_SECRET=CHANGE_ME_AT_LEAST_32_CHARS
+APP_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+```
 
-> [!WARNING]
-> **Current Implementation**: This uses browser localStorage (Option 1 - Quick Fix)
-> 
-> - ✅ Perfect for: Demo, development, single-user usage
-> - ❌ Not suitable for: Multi-user production, team collaboration
-> - 📦 Data stored locally in browser only (not synchronized across devices)
+Generate JWT secret: `openssl rand -base64 32`
 
-## Future Migration
+## Project Structure
 
-For production deployment with multi-user support, see migration plan to **Option 2 (Backend + PostgreSQL)** in the project documentation.
-
-## Technology Stack
-
-- **Frontend**: React 19, TypeScript, Vite
-- **Charts**: Recharts
-- **Icons**: Lucide React
-- **Persistence**: Browser localStorage (auto-save enabled)
+```
+jpmonitor/
+├── backend-java/
+│   ├── api/          # REST controllers + config
+│   ├── domains/      # Business logic + entities
+│   └── platform/     # Shared security, utils
+├── components/       # React UI components
+├── hestia-api/       # AI chat bridge
+├── docker-compose.yml
+└── nginx.conf
+```
 
 ## Documentation
 
-View your app in AI Studio: https://ai.studio/apps/drive/1huTP9rvkeALaVxN7mbQKVk606eG_mx2U
+- [Architecture & Design](DESIGN.md)
+- [Deployment Guide](DEPLOYMENT.md)
+- [Technical Documentation](TECHNICAL_DOCUMENTATION.md)
+- [Security Audit](SECURITY_AUDIT.md)
 
 ---
 
-**Status**: ✅ Ready for Demo & Development  
-**Data Persistence**: ✅ Enabled  
-**Last Updated**: 2025-11-24
+**Status**: 🚧 Active Development
