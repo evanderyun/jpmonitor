@@ -48,7 +48,7 @@ const AIChatWidget: React.FC = () => {
         const filtered = prev.filter(m => m.id !== "loading");
         return [...filtered, { id: Date.now().toString(), role: "assistant", content: data.reply || "Maaf, saya tidak bisa memproses permintaan Anda.", timestamp: new Date() }];
       });
-    } catch (_err) {
+    } catch {
       setMessages(prev => {
         const filtered = prev.filter(m => m.id !== "loading");
         return [...filtered, { id: Date.now().toString(), role: "assistant", content: "Terjadi kesalahan. Silakan coba lagi.", timestamp: new Date() }];

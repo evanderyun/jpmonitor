@@ -742,7 +742,7 @@ const MutationView: React.FC = () => {
                                 {(modalType === MutationType.TRANSFER || modalType === MutationType.ACQUISITION) && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
                                         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 opacity-70">
-                                            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase">Source Location</label>
+                                            <span className="block text-xs font-bold text-slate-500 mb-2 uppercase">Source Location</span>
                                             <div className="flex items-center gap-2 text-slate-700 font-medium p-2 bg-white rounded border border-slate-200">
                                                 <MapPin size={16} className="text-slate-400" />
                                                 {modalType === MutationType.ACQUISITION ? 'VENDOR / NEW' :

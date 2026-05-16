@@ -100,7 +100,7 @@ const EmployeeView: React.FC = () => {
         subLabel: l.code
     }));
 
-    const getLocationName = (locationId: string) => {
+    const getLocationName = (locationId?: string) => {
         const loc = locations.find(l => l.id === locationId);
         return loc ? loc.name : '-';
     };

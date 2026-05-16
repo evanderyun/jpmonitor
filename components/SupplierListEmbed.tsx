@@ -1,4 +1,4 @@
-import { Supplier } from '../types';
+import React from 'react';
 
 interface SupplierListEmbedProps {
     suppliers: any[];

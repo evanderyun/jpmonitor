@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { inventoryAPI, equipmentAPI, suppliersAPI, employeesAPI, shipmentsAPI, locationsAPI } from '../services/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { InventoryTxType, SparePart, GoodsShipment, ShipmentItem, InventoryTransaction } from '../types';
-import { PackageSearch, AlertTriangle, RefreshCw, Plus, Filter, Archive, Search, Save, BarChart3, PieChart as PieIcon, Trash2, Truck, Printer, DollarSign, CalendarClock, History } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Plus, Save, BarChart3, PieChart as PieIcon, Trash2, Truck, Printer, DollarSign, CalendarClock } from 'lucide-react';
 import SearchableSelect from './SearchableSelect';
 import InventoryDashboard from './InventoryDashboard';
 import PartList from './PartList';
@@ -677,8 +677,8 @@ const InventoryView: React.FC = () => {
                                             <div className="text-xs text-slate-500">From: {s.sourceLocationName}</div>
                                         </td>
                                         <td className="px-6 py-3 text-xs text-slate-600">
-                                            <div>{s.driver_name || s.driverName || 'N/A'}</div>
-                                            <div className="font-mono text-[10px]">{s.vehicle_code || s.policeNumber || 'N/A'}</div>
+                                            <div>{s.driverName || 'N/A'}</div>
+                                            <div className="font-mono text-[10px]">{s.policeNumber || 'N/A'}</div>
                                         </td>
                                         <td className="px-6 py-3">
                                             <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold">{s.items.length} Lines</span>
@@ -823,7 +823,7 @@ const InventoryView: React.FC = () => {
                                         {/* PAYMENT TERMS - ONLY FOR PURCHASE */}
                                         {txForm.type === InventoryTxType.PURCHASE && (
                                             <div className="pt-2 border-t border-green-200">
-                                                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Payment Method</label>
+                                                <span className="block text-xs font-bold text-slate-500 mb-1 uppercase">Payment Method</span>
                                                 <div className="flex gap-2 mb-3">
                                                     <button
                                                         type="button"
@@ -1147,7 +1147,7 @@ const InventoryView: React.FC = () => {
 
                                 {/* Transport Provider Selection */}
                                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                    <label className="block text-xs font-bold text-slate-500 mb-3 uppercase">Transport Provider</label>
+                                    <span className="block text-xs font-bold text-slate-500 mb-3 uppercase">Transport Provider</span>
                                     <div className="flex gap-4 mb-4" role="radiogroup" aria-labelledby="transport-provider-label">
                                         <label htmlFor="internal-fleet-radio" className="flex items-center gap-2 cursor-pointer">
                                             <input
@@ -1265,7 +1265,7 @@ const InventoryView: React.FC = () => {
                                                 onChange={e => {
                                                     const part = parts.find(p => p.id === e.target.value);
                                                     if (part) {
-                                                        setTempShipmentItem({ ...tempShipmentItem, partId: part.id, unit: part.unit });
+                                                        setTempShipmentItem({ ...tempShipmentItem, partId: part.id });
                                                     }
                                                 }}
                                                 id="temp-shipment-part-select"
@@ -1415,19 +1415,19 @@ const InventoryView: React.FC = () => {
                             {/* General Info */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1">Date</label>
+                                    <span className="block text-xs font-bold text-slate-500 mb-1">Date</span>
                                     <p className="text-sm font-semibold">{viewingShipment.date}</p>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1">DO Number</label>
+                                    <span className="block text-xs font-bold text-slate-500 mb-1">DO Number</span>
                                     <p className="text-sm font-mono font-bold text-blue-600">{viewingShipment.doNumber}</p>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1">From</label>
+                                    <span className="block text-xs font-bold text-slate-500 mb-1">From</span>
                                     <p className="text-sm font-semibold">{viewingShipment.sourceLocationName}</p>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1">To</label>
+                                    <span className="block text-xs font-bold text-slate-500 mb-1">To</span>
                                     <p className="text-sm font-semibold">{viewingShipment.targetName}</p>
                                     <p className="text-xs text-slate-500">{viewingShipment.targetType}</p>
                                 </div>
@@ -1486,7 +1486,7 @@ const InventoryView: React.FC = () => {
                             {/* Notes */}
                             {viewingShipment.notes && (
                                 <div className="border-t pt-4">
-                                    <label className="block text-xs font-bold text-slate-500 mb-2">Notes</label>
+                                    <span className="block text-xs font-bold text-slate-500 mb-2">Notes</span>
                                     <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded">{viewingShipment.notes}</p>
                                 </div>
                             )}

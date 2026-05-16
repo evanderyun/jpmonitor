@@ -42,7 +42,6 @@ const MaintenanceView: React.FC<MaintenanceViewProps> = ({
     setEditForm,
     logForm,
     setLogForm,
-    selectedEquipment,
     prediction,
     selectedTechToAdd,
     setSelectedTechToAdd,
@@ -131,7 +130,7 @@ const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-slate-600 mb-1 uppercase">Finish Time</label>
+                            <span className="block text-xs font-bold text-slate-600 mb-1 uppercase">Finish Time</span>
                             <div className="grid grid-cols-2 gap-2">
                                 <label htmlFor="edit-end-date" className="sr-only">End Date</label>
                                 <input id="edit-end-date" type="date" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" value={editForm.endDate} onChange={e => setEditForm({ ...editForm, endDate: e.target.value })} />
@@ -153,7 +152,7 @@ const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                         {/* Internal Specifics Update */}
                         {editingLog.serviceProvider === 'INTERNAL' && (
                             <div className="space-y-3 border-t border-slate-200 pt-3">
-                                <label className="text-xs font-bold text-slate-600 uppercase">Mechanic Storing Cost</label>
+                                <span className="text-xs font-bold text-slate-600 uppercase">Mechanic Storing Cost</span>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
                                         <label htmlFor="edit-fuel-cost" className="text-[10px] text-slate-500 font-bold block mb-1"><Fuel size={10} /> Minyak Sarana (Fuel)</label>
@@ -193,7 +192,7 @@ const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                         {/* External Specifics Update */}
                         {editingLog.serviceProvider === 'EXTERNAL' && (
                             <div className="space-y-3 border-t border-slate-200 pt-3">
-                                <label className="text-xs font-bold text-slate-600 uppercase">Vendor Invoice</label>
+                                <span className="text-xs font-bold text-slate-600 uppercase">Vendor Invoice</span>
                                 <label htmlFor="edit-ext-invoice" className="sr-only">Invoice Number</label>
                                 <input id="edit-ext-invoice" type="text" placeholder="Invoice Number" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" value={editForm.externalInvoiceNumber} onChange={e => setEditForm({ ...editForm, externalInvoiceNumber: e.target.value })} />
                                 <label htmlFor="edit-ext-cost" className="sr-only">Total Cost</label>

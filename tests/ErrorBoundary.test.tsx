@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import ErrorBoundary from '../components/ErrorBoundary'
 
-function Buggy() {
+function Buggy(): React.ReactNode {
   throw new Error('boom')
 }
 

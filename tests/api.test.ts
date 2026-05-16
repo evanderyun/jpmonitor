@@ -123,7 +123,7 @@ describe('fetchJson', () => {
     // Create a wrapper that counts instantiations
     globalThis.AbortController = class extends origController {
       constructor(...args: any[]) {
-        super(...args)
+        super(...args as ConstructorParameters<typeof AbortController>)
         abortCount++
       }
     } as any

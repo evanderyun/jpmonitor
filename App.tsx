@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Navigation from './components/Navigation';
+import ErrorBoundary from './components/ErrorBoundary';
 const DashboardView = React.lazy(() => import('./components/DashboardView'))
 const ProductionView = React.lazy(() => import('./components/ProductionView'))
 const FleetView = React.lazy(() => import('./components/FleetView'))
@@ -22,7 +23,6 @@ const App: React.FC = () => {
   const [isChecking, setIsChecking] = React.useState(true);
   const [currentUser, setCurrentUser] = React.useState<any>(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Check authentication on mount
   useEffect(() => {
@@ -80,18 +80,18 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto animate-fade-in">
           <React.Suspense fallback={<div className="text-center py-20 text-text-muted">Loading...</div>}>
             <Routes>
-              <Route path="/" element={<DashboardView />} />
-              <Route path="/fleet" element={<FleetView />} />
-              <Route path="/mutation" element={<MutationView />} />
-              <Route path="/inventory" element={<InventoryView />} />
-              <Route path="/production" element={<ProductionView />} />
-              <Route path="/timesheet" element={<TimesheetView />} />
-              <Route path="/employee" element={<EmployeeView />} />
-              <Route path="/supplier" element={<SupplierView />} />
-              <Route path="/debt" element={<DebtView />} />
-              <Route path="/location" element={<LocationView />} />
-              <Route path="/hse" element={<HSEView />} />
-              <Route path="/audit" element={<AuditLogView />} />
+              <Route path="/" element={<ErrorBoundary><DashboardView /></ErrorBoundary>} />
+              <Route path="/fleet" element={<ErrorBoundary><FleetView /></ErrorBoundary>} />
+              <Route path="/mutation" element={<ErrorBoundary><MutationView /></ErrorBoundary>} />
+              <Route path="/inventory" element={<ErrorBoundary><InventoryView /></ErrorBoundary>} />
+              <Route path="/production" element={<ErrorBoundary><ProductionView /></ErrorBoundary>} />
+              <Route path="/timesheet" element={<ErrorBoundary><TimesheetView /></ErrorBoundary>} />
+              <Route path="/employee" element={<ErrorBoundary><EmployeeView /></ErrorBoundary>} />
+              <Route path="/supplier" element={<ErrorBoundary><SupplierView /></ErrorBoundary>} />
+              <Route path="/debt" element={<ErrorBoundary><DebtView /></ErrorBoundary>} />
+              <Route path="/location" element={<ErrorBoundary><LocationView /></ErrorBoundary>} />
+              <Route path="/hse" element={<ErrorBoundary><HSEView /></ErrorBoundary>} />
+              <Route path="/audit" element={<ErrorBoundary><AuditLogView /></ErrorBoundary>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </React.Suspense>
