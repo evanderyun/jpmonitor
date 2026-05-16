@@ -5,6 +5,8 @@ import com.jpmonitor.domains.core.entity.AuditLog;
 import com.jpmonitor.domains.core.repository.AuditLogRepository;
 import com.jpmonitor.domains.core.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,18 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AuditLogDTO> getLogs(String module, Pageable pageable) {
+        Page<AuditLog> page;
+        if (module != null && !module.isBlank()) {
+            page = auditLogRepository.findByModule(module, pageable);
+        } else {
+            page = auditLogRepository.findAll(pageable);
+        }
+        return page.map(this::mapToDTO);
     }
 
     @Override
@@ -51,10 +65,12 @@ public class AuditLogServiceImpl implements AuditLogService {
         return new AuditLogDTO(
                 log.getId(),
                 log.getAction(),
+                log.getModule(),
                 log.getEntityName(),
                 log.getEntityId(),
                 log.getUserId(),
                 log.getUsername(),
+                log.getDescription(),
                 log.getDetails(),
                 log.getIpAddress(),
                 log.getCreatedAt());

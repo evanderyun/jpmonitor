@@ -1,6 +1,6 @@
 package com.jpmonitor.domains.core.entity;
 
-import com.jpmonitor.platform.common.BaseEntity;
+import com.jpmonitor.platform.common.BaseImmutableEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,7 +11,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "audit_logs")
-public class AuditLog extends BaseEntity {
+public class AuditLog extends BaseImmutableEntity {
 
     @Column(name = "user_id")
     private UUID userId;
@@ -34,7 +34,7 @@ public class AuditLog extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "TEXT") // Changed to TEXT from jsonb for simplicity without specific dialect mapping
+    @Column(columnDefinition = "TEXT")
     private String details;
 
     @Column(name = "ip_address")

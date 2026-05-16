@@ -1,29 +1,22 @@
 package com.jpmonitor.api.controller;
 
-import com.jpmonitor.domains.inventory.dto.SparePartDTO;
 import com.jpmonitor.domains.inventory.dto.InventoryTransactionDTO;
-import com.jpmonitor.domains.inventory.entity.SparePart;
-import com.jpmonitor.domains.inventory.entity.InventoryTransaction;
-import com.jpmonitor.domains.inventory.repository.SparePartRepository;
-import com.jpmonitor.domains.inventory.repository.InventoryTransactionRepository;
-import com.jpmonitor.platform.exception.ResourceNotFoundException;
+import com.jpmonitor.domains.inventory.dto.SparePartDTO;
+import com.jpmonitor.domains.inventory.service.InventoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/inventory") // FIXED: Removed dual mapping conflict
+@RequestMapping("/api/inventory")
 @RequiredArgsConstructor
 public class InventoryController {
 
-    private final SparePartRepository sparePartRepository;
-    private final InventoryTransactionRepository transactionRepository;
+    private final InventoryService inventoryService;
 
     // --- PARTS ---
 
@@ -31,55 +24,27 @@ public class InventoryController {
     public List<SparePartDTO> getAllParts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Boolean lowStock) {
-
-        // Apply filters if provided
-        List<SparePart> parts;
-        if (category != null || (lowStock != null && lowStock)) {
-            parts = sparePartRepository.findAll().stream()
-                    .filter(p -> category == null || category.equals(p.getCategory()))
-                    .filter(p -> lowStock == null || !lowStock || p.getCurrentStock() < p.getMinStockLevel())
-                    .collect(Collectors.toList());
-        } else {
-            parts = sparePartRepository.findAll();
-        }
-
-        return parts.stream()
-                .map(this::mapPartToDTO)
-                .collect(Collectors.toList());
+        return inventoryService.getAllParts(category, lowStock);
     }
 
     @GetMapping("/parts/{id}")
     public ResponseEntity<SparePartDTO> getPart(@PathVariable UUID id) {
-        SparePart part = sparePartRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Spare Part", id));
-        return ResponseEntity.ok(mapPartToDTO(part));
+        return ResponseEntity.ok(inventoryService.getPart(id));
     }
 
     @PostMapping("/parts")
     public ResponseEntity<SparePartDTO> createPart(@Valid @RequestBody SparePartDTO dto) {
-        SparePart part = new SparePart();
-        updatePartFromDTO(part, dto);
-
-        SparePart saved = sparePartRepository.save(part);
-        return ResponseEntity.ok(mapPartToDTO(saved));
+        return ResponseEntity.ok(inventoryService.createPart(dto));
     }
 
     @PutMapping("/parts/{id}")
     public ResponseEntity<SparePartDTO> updatePart(@PathVariable UUID id, @Valid @RequestBody SparePartDTO dto) {
-        SparePart part = sparePartRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Spare Part", id));
-
-        updatePartFromDTO(part, dto);
-        SparePart saved = sparePartRepository.save(part);
-        return ResponseEntity.ok(mapPartToDTO(saved));
+        return ResponseEntity.ok(inventoryService.updatePart(id, dto));
     }
 
     @DeleteMapping("/parts/{id}")
     public ResponseEntity<Void> deletePart(@PathVariable UUID id) {
-        if (!sparePartRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Spare Part", id);
-        }
-        sparePartRepository.deleteById(id);
+        inventoryService.deletePart(id);
         return ResponseEntity.ok().build();
     }
 
@@ -117,132 +82,18 @@ public class InventoryController {
             @RequestParam(required = false) UUID supplierId,
             @RequestParam(required = false) String fromDate,
             @RequestParam(required = false) String toDate) {
-
-        List<InventoryTransaction> transactions = transactionRepository.findAll();
-
-        // Apply filters
-        return transactions.stream()
-                .filter(tx -> type == null || type.equals(tx.getType()))
-                .filter(tx -> partId == null || partId.equals(tx.getPart().getId()))
-                .filter(tx -> supplierId == null
-                        || (tx.getSupplier() != null && supplierId.equals(tx.getSupplier().getId())))
-                .filter(tx -> fromDate == null || !tx.getDate().isBefore(LocalDate.parse(fromDate)))
-                .filter(tx -> toDate == null || !tx.getDate().isAfter(LocalDate.parse(toDate)))
-                .map(this::mapTxToDTO)
-                .collect(Collectors.toList());
+        return inventoryService.getTransactions(type, partId, supplierId, fromDate, toDate);
     }
 
     @PostMapping("/transactions")
     public ResponseEntity<InventoryTransactionDTO> createTransaction(@Valid @RequestBody InventoryTransactionDTO dto) {
-        InventoryTransaction tx = new InventoryTransaction();
-        tx.setTrxNumber("TRX-" + System.currentTimeMillis()); // Simple gen for now
-        tx.setDate(LocalDate.parse(dto.date()));
-        tx.setType(dto.type());
-        tx.setQuantity(dto.quantity());
-        tx.setAppliedPrice(dto.pricePerUnit());
-        tx.setReferenceId(dto.referenceId());
-        tx.setNotes(dto.notes());
-
-        // Set payment fields
-        tx.setPaymentMethod(dto.paymentMethod()); // Updated field name
-        tx.setDueDate(dto.dueDate() != null ? LocalDate.parse(dto.dueDate()) : null);
-        tx.setPaidDate(dto.paidDate() != null ? LocalDate.parse(dto.paidDate()) : null);
-
-        // Fetch Part
-        SparePart part = sparePartRepository.findById(dto.partId())
-                .orElseThrow(() -> new ResourceNotFoundException("Spare Part", dto.partId()));
-        tx.setPart(part);
-
-        // Logic update stock (Simplified for demo)
-        if ("USAGE".equals(dto.type())) {
-            int newStock = part.getCurrentStock() - dto.quantity();
-            if (newStock < 0) {
-                throw new IllegalArgumentException(
-                        "Insufficient stock. Current: " + part.getCurrentStock() + ", Requested: " + dto.quantity());
-            }
-            part.setCurrentStock(newStock);
-        } else {
-            part.setCurrentStock(part.getCurrentStock() + dto.quantity());
-        }
-        sparePartRepository.save(part);
-
-        InventoryTransaction saved = transactionRepository.save(tx);
-        return ResponseEntity.ok(mapTxToDTO(saved));
+        return ResponseEntity.ok(inventoryService.createTransaction(dto));
     }
 
     @PutMapping("/transactions/{id}")
     public ResponseEntity<InventoryTransactionDTO> updateTransaction(
             @PathVariable UUID id,
             @Valid @RequestBody InventoryTransactionDTO dto) {
-
-        InventoryTransaction tx = transactionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Inventory Transaction", id));
-
-        // Allow updating notes and reference
-        if (dto.notes() != null) {
-            tx.setNotes(dto.notes());
-        }
-        if (dto.referenceId() != null) {
-            tx.setReferenceId(dto.referenceId());
-        }
-
-        InventoryTransaction saved = transactionRepository.save(tx);
-        return ResponseEntity.ok(mapTxToDTO(saved));
-    }
-
-    // --- HELPER METHODS ---
-
-    private void updatePartFromDTO(SparePart part, SparePartDTO dto) {
-        part.setPartNumber(dto.partNumber());
-        part.setName(dto.name());
-        part.setBrand(dto.brand());
-        part.setCategory(dto.category());
-        part.setCurrentStock(dto.currentStock());
-        part.setMinStockLevel(dto.minStockLevel());
-        part.setUnit(dto.unit());
-        part.setRackCode(dto.location()); // Frontend sends "location" as Rack Code string
-        // part.setLocationId(dto.locationId()); // Needs fetching Location entity if
-        // needed
-    }
-
-    private SparePartDTO mapPartToDTO(SparePart p) {
-        return new SparePartDTO(
-                p.getId(),
-                p.getPartNumber(),
-                p.getName(),
-                p.getBrand(),
-                p.getCategory(),
-                p.getCurrentStock(),
-                p.getMinStockLevel(),
-                p.getUnit(),
-                p.getLocation() != null ? p.getLocation().getId() : null,
-                p.getRackCode(),
-                p.getCurrentPriceCash(), // Using current price as proxy for average cost in FE
-                p.getPreferredSupplier() != null ? p.getPreferredSupplier().getId() : null);
-    }
-
-    private InventoryTransactionDTO mapTxToDTO(InventoryTransaction tx) {
-        // Derive payment status from due date
-        String paymentStatus = null;
-        if (tx.getDueDate() != null) {
-            paymentStatus = tx.getDueDate().isBefore(LocalDate.now()) ? "Overdue" : "Pending";
-            // If there was a paid date field, we'd check that too
-        }
-
-        return new InventoryTransactionDTO(
-                tx.getId(),
-                tx.getDate().toString(),
-                tx.getType(),
-                tx.getPart().getId(),
-                tx.getQuantity(),
-                tx.getAppliedPrice(),
-                tx.getReferenceId(),
-                tx.getEquipment() != null ? tx.getEquipment().getId() : null,
-                tx.getSupplier() != null ? tx.getSupplier().getId() : null,
-                tx.getNotes(),
-                tx.getPaymentMethod(), // paymentType
-                paymentStatus, // paymentStatus (derived)
-                tx.getDueDate() != null ? tx.getDueDate().toString() : null, // dueDate
-                null); // paidDate (not in entity yet)
+        return ResponseEntity.ok(inventoryService.updateTransaction(id, dto));
     }
 }
