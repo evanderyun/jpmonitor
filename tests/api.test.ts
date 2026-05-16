@@ -231,7 +231,7 @@ describe('fetchJson', () => {
     }
 
     // Restore window
-    ;(global as any).window = win
+    (global as any).window = win
 
     expect(caught).not.toBeNull()
     expect(caught!.message).toBe('Unauthorized')

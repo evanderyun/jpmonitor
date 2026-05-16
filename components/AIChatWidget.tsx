@@ -48,10 +48,10 @@ const AIChatWidget: React.FC = () => {
         const filtered = prev.filter(m => m.id !== "loading");
         return [...filtered, { id: Date.now().toString(), role: "assistant", content: data.reply || "Maaf, saya tidak bisa memproses permintaan Anda.", timestamp: new Date() }];
       });
-    } catch (err) {
+    } catch (_err) {
       setMessages(prev => {
         const filtered = prev.filter(m => m.id !== "loading");
-        return [...filtered, { id: Date.now().toString(), role: "assistant", content: "Terjadi kesalahan. Silakan coba lagI.", timestamp: new Date() }];
+        return [...filtered, { id: Date.now().toString(), role: "assistant", content: "Terjadi kesalahan. Silakan coba lagi.", timestamp: new Date() }];
       });
     } finally {
       setLoading(false);
@@ -70,7 +70,7 @@ const AIChatWidget: React.FC = () => {
         aria-label="Open AI Assistant"
       >
         <MessageSquare size={20} />
-        <span className="text-sm font-medium">A tia AI</span>
+        <span className="text-sm font-medium">Atia AI</span>
       </button>
     );
   }
@@ -84,7 +84,7 @@ const AIChatWidget: React.FC = () => {
             <Bot size={18} className="text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">A tia AI Assistant</h3>
+            <h3 className="text-sm font-semibold text-white">Atia AI Assistant</h3>
             <p className="text-xs text-white/70">jpmonitor</p>
           </div>
         </div>

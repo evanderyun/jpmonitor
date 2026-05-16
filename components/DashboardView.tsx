@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { dashboardAPI } from '../services/api';
 import { Card, StatCard, Badge, SectionHeader } from './ui/Card';
-import { Pickaxe, Database, TrendingUp, AlertTriangle, PackageSearch, CheckCircle, RefreshCw, Sparkles } from 'lucide-react';
+import { Pickaxe, Database, TrendingUp, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 
 const DashboardView: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
