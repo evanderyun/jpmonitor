@@ -1,4 +1,3 @@
-import React from 'react';
 import { SparePart } from '../types';
 import { Search, Filter, Trash2 } from 'lucide-react';
 

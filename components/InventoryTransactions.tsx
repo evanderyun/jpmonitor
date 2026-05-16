@@ -1,4 +1,3 @@
-import React from 'react';
 import { InventoryTransaction, SparePart } from '../types';
 import { InventoryTxType } from '../types';
 import { Search, History } from 'lucide-react';

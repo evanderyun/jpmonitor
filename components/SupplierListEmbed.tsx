@@ -1,11 +1,10 @@
-import React from 'react';
 import { Supplier } from '../types';
 
 interface SupplierListEmbedProps {
     suppliers: any[];
 }
 
-const SupplierListEmbed: React.FC<SupplierListEmbedProps> = ({ suppliers }) => {
+const SupplierListEmbed = ({ suppliers }: SupplierListEmbedProps) => {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100">

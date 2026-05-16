@@ -1,4 +1,3 @@
-import React from 'react';
 import { SparePart, InventoryTransaction } from '../types';
 
 interface FuelLogsProps {
@@ -6,7 +5,7 @@ interface FuelLogsProps {
     spareParts: SparePart[];
 }
 
-const FuelLogs: React.FC<FuelLogsProps> = ({ partsHistory, spareParts }) => {
+const FuelLogs = ({ partsHistory, spareParts }: FuelLogsProps) => {
     return (
         <div className="p-6 overflow-y-auto bg-white">
             <table className="w-full text-sm text-left border rounded-lg overflow-hidden">

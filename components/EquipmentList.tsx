@@ -1,4 +1,3 @@
-import React from 'react';
 import { Filter, Search, ClipboardList, Gauge } from 'lucide-react';
 import { Equipment } from '../types';
 

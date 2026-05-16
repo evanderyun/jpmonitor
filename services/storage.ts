@@ -42,16 +42,19 @@ export function saveToStorage(data: StorageData['data']): boolean {
         const jsonString = JSON.stringify(storageData);
         localStorage.setItem(STORAGE_KEY, jsonString);
 
-        console.log('✅ Data saved to localStorage', {
-            size: (jsonString.length / 1024).toFixed(2) + ' KB',
-            timestamp: storageData.timestamp
-        });
+        if (!import.meta.env.PROD) {
+            console.log('✅ Data saved to localStorage', {
+                size: (jsonString.length / 1024).toFixed(2) + ' KB',
+                timestamp: storageData.timestamp
+            });
+        }
 
         return true;
-    } catch { // Removed 'error' variable as it was unused
-        console.error('❌ Failed to save to localStorage');
+    } catch {
+        if (!import.meta.env.PROD) {
+            console.error('❌ Failed to save to localStorage');
+        }
 
-        // Check if quota exceeded logic could be added here if needed, but simplified for now to fix lint
         return false;
     }
 }
@@ -64,7 +67,9 @@ export function loadFromStorage(): StorageData['data'] | null {
         const jsonString = localStorage.getItem(STORAGE_KEY);
 
         if (!jsonString) {
-            console.log('ℹ️ No saved data found in localStorage');
+            if (!import.meta.env.PROD) {
+                console.log('ℹ️ No saved data found in localStorage');
+            }
             return null;
         }
 
@@ -72,20 +77,25 @@ export function loadFromStorage(): StorageData['data'] | null {
 
         // Version check (for future migrations)
         if (storageData.version !== STORAGE_VERSION) {
-            console.warn(`⚠️ Storage version mismatch. Expected ${STORAGE_VERSION}, got ${storageData.version}`);
-            // Could implement migration logic here in the future
+            if (!import.meta.env.PROD) {
+                console.warn(`⚠️ Storage version mismatch. Expected ${STORAGE_VERSION}, got ${storageData.version}`);
+            }
         }
 
-        console.log('✅ Data loaded from localStorage', {
-            size: (jsonString.length / 1024).toFixed(2) + ' KB',
-            timestamp: storageData.timestamp,
-            age: getDataAge(storageData.timestamp)
-        });
+        if (!import.meta.env.PROD) {
+            console.log('✅ Data loaded from localStorage', {
+                size: (jsonString.length / 1024).toFixed(2) + ' KB',
+                timestamp: storageData.timestamp,
+                age: getDataAge(storageData.timestamp)
+            });
+        }
 
         return storageData.data;
 
-    } catch { // Removed 'error' variable as it was unused
-        console.error('❌ Failed to load from localStorage');
+    } catch {
+        if (!import.meta.env.PROD) {
+            console.error('❌ Failed to load from localStorage');
+        }
         return null;
     }
 }
@@ -96,9 +106,13 @@ export function loadFromStorage(): StorageData['data'] | null {
 export function clearStorage(): void {
     try {
         localStorage.removeItem(STORAGE_KEY);
-        console.log('✅ Storage cleared');
-    } catch { // Removed 'error' variable as it was unused
-        console.error('❌ Failed to clear storage');
+        if (!import.meta.env.PROD) {
+            console.log('✅ Storage cleared');
+        }
+    } catch {
+        if (!import.meta.env.PROD) {
+            console.error('❌ Failed to clear storage');
+        }
     }
 }
 
@@ -127,7 +141,7 @@ export function getStorageStats(): {
             age: getDataAge(storageData.timestamp)
         };
 
-    } catch { // Removed 'error' variable as it was unused
+    } catch {
         return { exists: false, size: '0 KB' };
     }
 }

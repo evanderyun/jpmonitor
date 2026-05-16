@@ -16,7 +16,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:jpmonitor_db}
     username: ${DB_USER:jpm_user}
-    password: ${DB_PASSWORD:jpmonitor_password}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10

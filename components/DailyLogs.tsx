@@ -1,11 +1,10 @@
-import React from 'react';
 import { ArrowRightLeft, X, CheckCircle, Truck } from 'lucide-react';
 
 interface DailyLogsProps {
     mutationHistory: any[];
 }
 
-const DailyLogs: React.FC<DailyLogsProps> = ({ mutationHistory }) => {
+const DailyLogs = ({ mutationHistory }: DailyLogsProps) => {
     return (
         <div className="p-6 overflow-y-auto h-full w-full">
             <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">

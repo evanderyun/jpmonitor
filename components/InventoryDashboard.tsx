@@ -1,4 +1,3 @@
-import React from 'react';
 import { PackageSearch, AlertTriangle, Archive } from 'lucide-react';
 
 interface InventoryDashboardProps {
@@ -7,7 +6,7 @@ interface InventoryDashboardProps {
     totalValue: number;
 }
 
-const InventoryDashboard: React.FC<InventoryDashboardProps> = ({ totalItems, lowStockItems, totalValue }) => {
+const InventoryDashboard = ({ totalItems, lowStockItems, totalValue }: InventoryDashboardProps) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
