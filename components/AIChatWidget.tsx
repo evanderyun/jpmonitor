@@ -105,7 +105,7 @@ const AIChatWidget: React.FC = () => {
               {msg.loading ? (
                 <div className="flex items-center gap-2 text-text-muted">
                   <Loader2 size={14} className="animate-spin" />
-                  <span className="text-xs">A tia berpikir</span>
+                  <span className="text-xs">Atia berpikir</span>
                 </div>
               ) : (
                 <div className="markdown-content">

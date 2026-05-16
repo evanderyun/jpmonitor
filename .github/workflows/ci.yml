@@ -51,7 +51,7 @@ jobs:
       - name: Run backend tests
         run: |
           cd backend-java
-          mvn test -pl api -am --batch-mode
+          mvn test -pl domains -am --batch-mode
 
       # Optional: package the backend jar for downstream jobs
       - name: Package backend (skip tests)
