@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import Navigation from '../components/Navigation'
 
 describe('Navigation', () => {
@@ -18,7 +19,11 @@ describe('Navigation', () => {
         dispatchEvent: vi.fn(),
       })),
     })
-    render(<Navigation activeTab="dashboard" setActiveTab={() => {}} />)
+    render(
+      <MemoryRouter>
+        <Navigation />
+      </MemoryRouter>
+    )
     expect(screen.getByRole('navigation')).toBeTruthy()
   })
 })

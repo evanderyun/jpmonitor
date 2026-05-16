@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Hammer, Truck, FileText, Activity, Settings, PackageSearch, ArrowRightLeft, Users, ShoppingBag, MapPin, Clock, Landmark, LogOut, Moon, Sun } from 'lucide-react';
 
 interface NavProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
   currentUser?: any;
   onLogout?: () => void;
 }
 
-const Navigation: React.FC<NavProps> = ({ activeTab, setActiveTab, currentUser, onLogout }) => {
+const linkClass = ({ isActive }: { isActive: boolean }) =>
+  'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-jpmonitor-md transition-all duration-200 ' +
+  (isActive ? 'bg-jpmonitor-red text-white font-medium' : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary');
+
+const Navigation: React.FC<NavProps> = ({ currentUser, onLogout }) => {
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('jpmonitor-dark-mode');
@@ -62,15 +65,12 @@ const Navigation: React.FC<NavProps> = ({ activeTab, setActiveTab, currentUser, 
       <nav className="flex-1 py-4 space-y-0.5 px-3 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const to = item.id === 'dashboard' ? '/' : `/${item.id}`;
           return (
-            <button key={item.id} onClick={() => setActiveTab(item.id)} className={
-              'w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-jpmonitor-md transition-all duration-200 ' +
-              (isActive ? 'bg-jpmonitor-red text-white font-medium' : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary')
-            }>
+            <NavLink key={item.id} to={to} className={linkClass}>
               <Icon size={16} className="flex-shrink-0" />
               <span className="truncate">{item.label}</span>
-            </button>
+            </NavLink>
           );
         })}
       </nav>

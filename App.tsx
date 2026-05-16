@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Navigation from './components/Navigation';
 const DashboardView = React.lazy(() => import('./components/DashboardView'))
 const ProductionView = React.lazy(() => import('./components/ProductionView'))
@@ -17,10 +18,11 @@ import AIChatWidget from './components/AIChatWidget';
 import { getCurrentUser, clearAuthData } from './services/authStorage';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [isChecking, setIsChecking] = React.useState(true);
+  const [currentUser, setCurrentUser] = React.useState<any>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Check authentication on mount
   useEffect(() => {
@@ -37,7 +39,6 @@ const App: React.FC = () => {
     checkAuth();
   }, []);
 
-
   const handleLoginSuccess = () => {
     const user = getCurrentUser();
     setCurrentUser(user);
@@ -48,7 +49,7 @@ const App: React.FC = () => {
     clearAuthData();
     setIsAuthenticated(false);
     setCurrentUser(null);
-    setActiveTab('dashboard');
+    navigate('/');
   };
 
   // Show loading while checking auth
@@ -68,57 +69,32 @@ const App: React.FC = () => {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <DashboardView />
-      case 'timesheet':
-        return <TimesheetView />
-      case 'production':
-        return <ProductionView />
-      case 'fleet':
-        return <FleetView />
-      case 'mutation':
-        return <MutationView />
-      case 'inventory':
-        return <InventoryView />
-      case 'employee':
-        return <EmployeeView />
-      case 'supplier':
-        return <SupplierView />
-      case 'debt':
-        return <DebtView />
-      case 'location':
-        return <LocationView />
-      case 'hse':
-        return <HSEView />
-      case 'audit':
-        return <AuditLogView />
-      default:
-        return (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400">
-            <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl">🛠️</span>
-            </div>
-            <h3 className="text-lg font-medium text-slate-600">Module under development</h3>
-            <p className="text-sm">This feature is coming in the next sprint.</p>
-          </div>
-        );
-    }
-  };
-
   return (
     <div className="flex min-h-screen transition-colors duration-300 bg-bg-page">
       <Navigation
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
         currentUser={currentUser}
         onLogout={handleLogout}
       />
 
       <main className="flex-1 ml-64 p-8 overflow-y-auto h-screen">
         <div className="max-w-7xl mx-auto animate-fade-in">
-          {renderContent()}
+          <React.Suspense fallback={<div className="text-center py-20 text-text-muted">Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<DashboardView />} />
+              <Route path="/fleet" element={<FleetView />} />
+              <Route path="/mutation" element={<MutationView />} />
+              <Route path="/inventory" element={<InventoryView />} />
+              <Route path="/production" element={<ProductionView />} />
+              <Route path="/timesheet" element={<TimesheetView />} />
+              <Route path="/employee" element={<EmployeeView />} />
+              <Route path="/supplier" element={<SupplierView />} />
+              <Route path="/debt" element={<DebtView />} />
+              <Route path="/location" element={<LocationView />} />
+              <Route path="/hse" element={<HSEView />} />
+              <Route path="/audit" element={<AuditLogView />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </React.Suspense>
         </div>
       </main>
       <AIChatWidget />
