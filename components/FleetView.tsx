@@ -2,10 +2,13 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { employeesAPI, suppliersAPI, maintenanceAPI, equipmentAPI, inventoryAPI, mutationsAPI } from '../services/api';
 import { useQueryClient } from '@tanstack/react-query'
-import { Wrench, Clock, ClipboardList, Plus, Edit, X, Printer, PieChart, Car, Filter, Trash2, Fuel, Utensils, UserPlus, ShoppingBag, Users, Search, Gauge, ArrowRightLeft, Truck, CheckCircle } from 'lucide-react'; // Removed History
+import { Wrench, X, Printer, PieChart } from 'lucide-react';
 import { Equipment, MaintenanceRecord, InventoryTransaction, SparePart } from '../types';
-import SearchableSelect from './SearchableSelect';
 import FleetDashboard from './FleetDashboard';
+import EquipmentList from './EquipmentList';
+import MaintenanceView from './MaintenanceView';
+import FuelLogs from './FuelLogs';
+import DailyLogs from './DailyLogs';
 
 // Helper Functions defined outside component to be stable
 const calculateEquipmentFinancials = (
@@ -513,7 +516,7 @@ const FleetView: React.FC = () => {
                 printWindow.document.write('<script src="https://cdn.tailwindcss.com"></script>');
                 printWindow.document.write('<style>@media print { body { -webkit-print-color-adjust: exact; } .page-break { page-break-before: always; } }</style>');
                 printWindow.document.write('</head><body class="bg-white">');
-                printWindow.document.write(printRef.current.innerHTML); // Need to preserve wrapper
+                printWindow.document.write(printRef.current.innerHTML);
                 printWindow.document.write('</body></html>');
                 printWindow.document.close();
                 setTimeout(() => { printWindow.print(); printWindow.close(); }, 1000);
@@ -590,106 +593,17 @@ const FleetView: React.FC = () => {
                 viewMode === 'dashboard' ? (
                     <FleetDashboard />
                 ) : (
-                    <>
-                        {/* Filters */}
-                        <div className="bg-white p-4 rounded-lg border border-slate-200 flex gap-4 items-center shadow-sm justify-between">
-                            <div className="flex gap-4 items-center">
-                                <Filter size={16} className="text-slate-500" />
-                                <label htmlFor="fleet-filter-type" className="sr-only">Filter Type</label>
-                                <select id="fleet-filter-type" className="border rounded px-2 py-1 text-sm bg-white text-slate-800 outline-none" value={filterType} onChange={e => setFilterType(e.target.value)}>
-                                    <option value="All">All Types</option>
-                                    {['Excavator', 'Dump Truck', 'Dozer', 'Grader', 'LV', 'Water Truck', 'Tower Lamp', 'Pump'].map(t => <option key={t} value={t}>{t}</option>)}
-                                </select>
-                                <label htmlFor="fleet-filter-status" className="sr-only">Filter Status</label>
-                                <select id="fleet-filter-status" className="border rounded px-2 py-1 text-sm bg-white text-slate-800 outline-none" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-                                    <option value="All">Active Status</option>
-                                    {['Operational', 'Breakdown', 'Maintenance', 'Sold', 'Scrapped'].map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            </div>
-                            {/* Search */}
-                            <div className="relative">
-                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <label htmlFor="fleet-search-input" className="sr-only">Search Unit</label>
-                                <input
-                                    id="fleet-search-input"
-                                    type="text"
-                                    placeholder="Search Unit, Owner, Serial..."
-                                    className="text-sm border border-slate-300 rounded-lg pl-9 pr-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Equipment Grid */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                            {filteredEquipment.map(eq => (
-                                <div key={eq.id} className={`bg-white p-5 rounded-xl shadow-sm border border-slate-200 ${eq.status === 'Sold' ? 'opacity-75 bg-slate-50' : ''}`}>
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h3 className="font-bold text-lg text-slate-900">{eq.code}</h3>
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-slate-500 text-sm">{eq.model} • {eq.manufactureYear || 'N/A'}</p>
-                                                <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 rounded font-bold uppercase">{eq.type}</span>
-                                            </div>
-                                        </div>
-                                        <span className={`px-2 py-1 rounded text-xs font-bold border ${eq.status === 'Operational' ? 'bg-green-100 text-green-800 border-green-200' :
-                                            eq.status === 'Breakdown' ? 'bg-red-100 text-red-800 border-red-200' :
-                                                'bg-slate-100 text-slate-800'
-                                            }`}>{eq.status}</span>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 mb-4 border-t border-b border-slate-50 py-2">
-                                        <div>
-                                            <span className="block text-[10px] text-slate-400 uppercase">Owner</span>
-                                            <span className="font-bold">{eq.owner || '-'}</span>
-                                        </div>
-                                        <div>
-                                            <span className="block text-[10px] text-slate-400 uppercase">Chassis No.</span>
-                                            <span className="font-mono">{eq.chassisNumber || '-'}</span>
-                                        </div>
-                                        <div>
-                                            <span className="block text-[10px] text-slate-400 uppercase">Serial No.</span>
-                                            <span className="font-mono">{eq.serialNumber || '-'}</span>
-                                        </div>
-                                        <div>
-                                            <span className="block text-[10px] text-slate-400 uppercase">Engine No.</span>
-                                            <span className="font-mono">{eq.engineNumber || '-'}</span>
-                                        </div>
-                                        {(eq.type === 'LV' || eq.type === 'Dump Truck' || eq.type === 'Water Truck') && (
-                                            <div className="col-span-2">
-                                                <span className="block text-[10px] text-slate-400 uppercase">Plate No.</span>
-                                                <span className="bg-slate-100 px-1 rounded font-mono font-bold">{eq.plateNumber || '-'}</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="flex justify-between items-center text-sm text-slate-600 mb-4">
-                                        <span className="flex items-center font-bold text-slate-800">
-                                            <Gauge size={16} className="inline mr-1 text-blue-500" />
-                                            {eq.hourMeter > 0 ? `${eq.hourMeter.toLocaleString()} HM` : `${(eq.kilometer || 0).toLocaleString()} KM`}
-                                        </span>
-                                        <span className="text-xs bg-slate-50 px-2 py-1 rounded">{eq.location}</span>
-                                    </div>
-                                    <div className="flex justify-between pt-4 border-t border-slate-100">
-                                        <button onClick={() => openDetails(eq)} className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
-                                            <ClipboardList size={14} /> View History
-                                        </button>
-                                        {eq.status !== 'Sold' && eq.status !== 'Scrapped' && (
-                                            <button onClick={() => toggleStatus(eq.id, eq.status)} className="text-xs font-medium text-slate-500 hover:text-slate-800">
-                                                Change Status
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                            {filteredEquipment.length === 0 && (
-                                <div className="col-span-full text-center py-10 text-slate-400">
-                                    No units found matching your filters.
-                                </div>
-                            )}
-                        </div>
-                    </>
+                    <EquipmentList
+                        filteredEquipment={filteredEquipment}
+                        filterType={filterType}
+                        setFilterType={setFilterType}
+                        filterStatus={filterStatus}
+                        setFilterStatus={setFilterStatus}
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        openDetails={openDetails}
+                        toggleStatus={toggleStatus}
+                    />
                 )
             )}
 
@@ -713,368 +627,44 @@ const FleetView: React.FC = () => {
 
                         <div className="flex-1 flex overflow-hidden bg-white">
                             {activeModalTab === 'maintenance' ? (
-                                <div className="flex w-full h-full">
-                                    {/* Left: List */}
-                                    <div className="w-3/5 border-r border-slate-200 overflow-y-auto bg-slate-50">
-                                        <div className="bg-white p-3 border-b flex gap-2 sticky top-0 z-10 shadow-sm">
-                                            <label htmlFor="wo-filter-status" className="sr-only">Filter Work Order Status</label>
-                                            <select id="wo-filter-status" className="text-xs border rounded bg-white text-slate-800 p-1" value={woFilterStatus} onChange={e => setWoFilterStatus(e.target.value)}>
-                                                <option value="ALL">All Status</option>
-                                                <option value="OPEN">Open</option>
-                                                <option value="CLOSED">Closed</option>
-                                            </select>
-                                        </div>
-                                        {filteredLogs.map(log => {
-                                            const isSelected = editingLog?.id === log.id;
-                                            return (
-                                                <div key={log.id}
-                                                    className={`p-4 border-b border-slate-100 cursor-pointer group relative transition-colors ${isSelected ? 'bg-blue-50 border-l-4 border-l-blue-500' : 'bg-white hover:bg-slate-50'}`}
-                                                    role="button"
-                                                    tabIndex={0}
-                                                    onClick={() => handleOpenEdit(log)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' || e.key === ' ') handleOpenEdit(log)
-                                                    }}
-                                                >
-                                                    <div className="flex justify-between items-start mb-1">
-                                                        <span className="font-mono font-bold text-xs text-slate-700">{log.woNumber}</span>
-                                                        <span className={`text-[10px] px-2 py-0.5 rounded border font-bold ${getStatusColor(log.status)}`}>
-                                                            {log.status.replace('_', ' ')}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-sm font-medium text-slate-900 mt-1 line-clamp-2">{log.description}</p>
-                                                    <div className="flex gap-2 mt-2 text-xs text-slate-500">
-                                                        <span className="font-semibold">{log.serviceProvider === 'INTERNAL' ? 'Internal Team' : 'External Vendor'}</span>
-                                                        <span>•</span>
-                                                        <span>{log.startDate}</span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Right: Form */}
-                                    <div className="w-2/5 p-6 overflow-y-auto bg-white">
-                                        {editingLog ? (
-                                            // UPDATE FORM
-                                            <form onSubmit={handleSubmitEdit} className="space-y-4">
-                                                <h4 className="font-bold text-blue-800 flex items-center gap-2 pb-2 border-b border-blue-100">
-                                                    <Edit size={16} /> Update {editingLog.woNumber}
-                                                </h4>
-                                                <div className="bg-blue-50 p-3 rounded text-xs text-blue-900 mb-2 border border-blue-100">
-                                                    Provider: <strong>{editingLog.serviceProvider}</strong>
-                                                </div>
-
-                                                <div>
-                                                    <label htmlFor="edit-status" className="block text-xs font-bold text-slate-600 mb-1 uppercase">Status</label>
-                                                    <select
-                                                        id="edit-status"
-                                                        className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
-                                                        value={editForm.status}
-                                                        onChange={e => setEditForm({ ...editForm, status: e.target.value })}
-                                                    >
-                                                        <option value="OPEN">OPEN</option>
-                                                        <option value="IN_PROGRESS">IN PROGRESS</option>
-                                                        <option value="WAITING_PART">WAITING PART</option>
-                                                        <option value="CLOSED">CLOSED</option>
-                                                        <option value="CANCEL">CANCEL</option>
-                                                    </select>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-xs font-bold text-slate-600 mb-1 uppercase">Finish Time</label>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <label htmlFor="edit-end-date" className="sr-only">End Date</label>
-                                                        <input id="edit-end-date" type="date" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" value={editForm.endDate} onChange={e => setEditForm({ ...editForm, endDate: e.target.value })} />
-                                                        <label htmlFor="edit-end-time" className="sr-only">End Time</label>
-                                                        <input id="edit-end-time" type="time" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" value={editForm.endTime} onChange={e => setEditForm({ ...editForm, endTime: e.target.value })} />
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <label htmlFor="edit-hm-start" className="block text-xs font-bold text-slate-600 mb-1 uppercase">HM Correction (Start)</label>
-                                                    <input id="edit-hm-start" type="number" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" value={editForm.hmAtStart} onChange={e => setEditForm({ ...editForm, hmAtStart: Number(e.target.value) })} />
-                                                </div>
-
-                                                <div>
-                                                    <label htmlFor="edit-notes" className="block text-xs font-bold text-slate-600 mb-1 uppercase">Notes / Report</label>
-                                                    <textarea id="edit-notes" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" rows={3} value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} />
-                                                </div>
-
-                                                {/* Internal Specifics Update */}
-                                                {editingLog.serviceProvider === 'INTERNAL' && (
-                                                    <div className="space-y-3 border-t border-slate-200 pt-3">
-                                                        <label className="text-xs font-bold text-slate-600 uppercase">Mechanic Storing Cost</label>
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            <div>
-                                                                <label htmlFor="edit-fuel-cost" className="text-[10px] text-slate-500 font-bold block mb-1"><Fuel size={10} /> Minyak Sarana (Fuel)</label>
-                                                                <input id="edit-fuel-cost" type="number" className="w-full border border-slate-300 rounded p-1 text-sm bg-white text-slate-900" value={editForm.mechanicStoringCost} onChange={e => setEditForm({ ...editForm, mechanicStoringCost: Number(e.target.value) })} />
-                                                            </div>
-                                                            <div>
-                                                                <label htmlFor="edit-meal-cost" className="text-[10px] text-slate-500 font-bold block mb-1"><Utensils size={10} /> Uang Makan (Meals)</label>
-                                                                <input id="edit-meal-cost" type="number" className="w-full border border-slate-300 rounded p-1 text-sm bg-white text-slate-900" value={editForm.mechanicMealCost} onChange={e => setEditForm({ ...editForm, mechanicMealCost: Number(e.target.value) })} />
-                                                            </div>
-                                                        </div>
-
-                                                        {/* DRIVER UPDATE */}
-                                                        <div className="bg-slate-50 p-2 rounded border border-slate-200 mt-2">
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    id="useDriverEdit"
-                                                                    checked={editForm.useDriver}
-                                                                    onChange={e => setEditForm({ ...editForm, useDriver: e.target.checked })}
-                                                                    className="w-4 h-4 text-blue-600 rounded"
-                                                                />
-                                                                <label htmlFor="useDriverEdit" className="text-xs font-bold text-slate-600 flex items-center gap-1 cursor-pointer">
-                                                                    <Car size={12} /> Using Dedicated Driver?
-                                                                </label>
-                                                            </div>
-                                                            {editForm.useDriver && (
-                                                                <div>
-                                                                    <label htmlFor="edit-driver-cost" className="text-[10px] text-slate-500 font-bold block mb-1">Driver Meal/Allowance</label>
-                                                                    <input id="edit-driver-cost" type="number" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900"
-                                                                        value={editForm.driverStoringCost} onChange={e => setEditForm({ ...editForm, driverStoringCost: Number(e.target.value) })} placeholder="0" />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {/* External Specifics Update */}
-                                                {editingLog.serviceProvider === 'EXTERNAL' && (
-                                                    <div className="space-y-3 border-t border-slate-200 pt-3">
-                                                        <label className="text-xs font-bold text-slate-600 uppercase">Vendor Invoice</label>
-                                                        <label htmlFor="edit-ext-invoice" className="sr-only">Invoice Number</label>
-                                                        <input id="edit-ext-invoice" type="text" placeholder="Invoice Number" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" value={editForm.externalInvoiceNumber} onChange={e => setEditForm({ ...editForm, externalInvoiceNumber: e.target.value })} />
-                                                        <label htmlFor="edit-ext-cost" className="sr-only">Total Cost</label>
-                                                        <input id="edit-ext-cost" type="number" placeholder="Total Cost (IDR)" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" value={editForm.externalCost} onChange={e => setEditForm({ ...editForm, externalCost: Number(e.target.value) })} />
-                                                    </div>
-                                                )}
-
-                                                {/* Parts Usage */}
-                                                {editingLog.serviceProvider === 'INTERNAL' && (
-                                                    <div className="bg-slate-50 p-3 rounded border border-slate-200">
-                                                        <label htmlFor="edit-part-select" className="text-xs font-bold text-slate-600 uppercase mb-2 block">Use Parts from Inventory</label>
-                                                        <div className="flex gap-2 mb-2">
-                                                            <div className="flex-1"><SearchableSelect options={partOptions} value={selectedPartId} onChange={setSelectedPartId} id="edit-part-select" className="bg-white" /></div>
-                                                            <label htmlFor="edit-part-qty" className="sr-only">Quantity</label>
-                                                            <input id="edit-part-qty" type="number" className="w-16 border border-slate-300 rounded p-1 text-center bg-white text-slate-900" value={selectedPartQty} onChange={e => setSelectedPartQty(Number(e.target.value))} />
-                                                            <button type="button" onClick={handleAddPartToLog} className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"><Plus size={16} /></button>
-                                                        </div>
-                                                        {tempUsedParts.map((p, i) => (
-                                                            <div key={i} className="text-xs flex justify-between bg-white p-2 mb-1 border border-slate-200 rounded shadow-sm">
-                                                                <span className="font-bold text-slate-700">{p.part.name}</span><span className="text-blue-600 font-mono">x{p.qty}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-
-                                                <div className="flex gap-2 pt-4">
-                                                    <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded shadow font-medium hover:bg-blue-700">Save Update</button>
-                                                    <button type="button" onClick={handleDeleteLog} className="text-red-500 border border-red-200 px-3 rounded hover:bg-red-50"><Trash2 size={16} /></button>
-                                                    <button type="button" onClick={() => setEditingLog(null)} className="text-slate-500 px-3 hover:text-slate-700">Cancel</button>
-                                                </div>
-                                            </form>
-                                        ) : (
-                                            // CREATE FORM
-                                            <form onSubmit={handleAddLog} className="space-y-4">
-                                                <h4 className="font-bold text-slate-800 flex items-center gap-2 pb-2 border-b border-slate-100"><Plus size={16} /> Create Work Order</h4>
-
-                                                {/* Service Provider Toggle */}
-                                                <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
-                                                    <button type="button" onClick={() => setLogForm({ ...logForm, serviceProvider: 'INTERNAL' })}
-                                                        className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${logForm.serviceProvider === 'INTERNAL' ? 'bg-white text-blue-700 shadow-sm border border-slate-200' : 'text-slate-500'}`}>
-                                                        INTERNAL TEAM
-                                                    </button>
-                                                    <button type="button" onClick={() => setLogForm({ ...logForm, serviceProvider: 'EXTERNAL' })}
-                                                        className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${logForm.serviceProvider === 'EXTERNAL' ? 'bg-white text-purple-700 shadow-sm border border-slate-200' : 'text-slate-500'}`}>
-                                                        EXTERNAL VENDOR
-                                                    </button>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div>
-                                                        <label htmlFor="create-type" className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Type</label>
-                                                        <select id="create-type" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" value={logForm.type} onChange={e => setLogForm({ ...logForm, type: e.target.value })}>
-                                                            <option value="Corrective">Corrective</option>
-                                                            <option value="Preventive">Preventive</option>
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label htmlFor="create-priority" className="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Priority</label>
-                                                        <select id="create-priority" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" value={logForm.priority} onChange={e => setLogForm({ ...logForm, priority: e.target.value })}>
-                                                            <option value="HIGH">High</option>
-                                                            <option value="MEDIUM">Medium</option>
-                                                            <option value="CRITICAL">Critical</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                {prediction && logForm.type === 'Preventive' && (
-                                                    <div className={`p-3 rounded border text-xs flex items-center gap-2 ${prediction.isMajor ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
-                                                        <Clock size={16} />
-                                                        <div>
-                                                            <span className="font-bold block">Recommended: {prediction.type}</span>
-                                                            <span>Target HM: {prediction.nextHM}</span>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                <div>
-                                                    <label htmlFor="create-description" className="block text-xs font-bold text-slate-600 mb-1 uppercase">Description</label>
-                                                    <textarea id="create-description" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" value={logForm.description} onChange={e => setLogForm({ ...logForm, description: e.target.value })} required placeholder="Describe the issue..." />
-                                                </div>
-
-                                                {/* Dynamic Fields based on Provider */}
-                                                {logForm.serviceProvider === 'INTERNAL' ? (
-                                                    <div className="space-y-3 bg-slate-50 p-3 rounded border border-slate-200">
-                                                        <label htmlFor="create-technician-select" className="text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><Users size={12} /> Crew Assignment</label>
-                                                        <div className="flex gap-2">
-                                                            <div className="flex-1"><SearchableSelect placeholder="Select Mechanic" options={technicianOptions} value={selectedTechToAdd} onChange={setSelectedTechToAdd} className="bg-white" id="create-technician-select"/></div>
-                                                            <button type="button" onClick={() => { if (selectedTechToAdd) { setLogForm({ ...logForm, technicians: [...logForm.technicians, selectedTechToAdd] }); setSelectedTechToAdd('') } }} className="bg-white border border-slate-300 p-2 rounded hover:bg-slate-100"><UserPlus size={16} className="text-slate-600" /></button>
-                                                        </div>
-                                                        <div className="flex flex-wrap gap-1">
-                                                            {logForm.technicians.map(t => (
-                                                                <span key={t} className="text-xs bg-white border border-slate-300 px-2 py-1 rounded text-slate-700 font-medium shadow-sm">{t}</span>
-                                                            ))}
-                                                            {logForm.technicians.length === 0 && <span className="text-xs text-slate-400 italic">No crew assigned</span>}
-                                                        </div>
-
-                                                        <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-200">
-                                                            <div>
-                                                                <label htmlFor="create-fuel-cost" className="text-[10px] text-slate-500 font-bold flex items-center gap-1 mb-1"><Fuel size={10} /> Minyak Sarana</label>
-                                                                <input id="create-fuel-cost" type="number" className="w-full border border-slate-300 rounded p-1 text-sm bg-white text-slate-900" value={logForm.mechanicStoringCost} onChange={e => setLogForm({ ...logForm, mechanicStoringCost: Number(e.target.value) })} placeholder="0" />
-                                                            </div>
-                                                            <div>
-                                                                <label htmlFor="create-meal-cost" className="text-[10px] text-slate-500 font-bold flex items-center gap-1 mb-1"><Utensils size={10} /> Uang Makan (Meals)</label>
-                                                                <input id="create-meal-cost" type="number" className="w-full border border-slate-300 rounded p-1 text-sm bg-white text-slate-900" value={logForm.mechanicMealCost} onChange={e => setLogForm({ ...logForm, mechanicMealCost: Number(e.target.value) })} placeholder="0" />
-                                                            </div>
-                                                        </div>
-
-                                                        {/* DRIVER CREATE */}
-                                                        <div className="bg-white p-2 rounded border border-slate-200 mt-2">
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    id="useDriver"
-                                                                    checked={logForm.useDriver}
-                                                                    onChange={e => setLogForm({ ...logForm, useDriver: e.target.checked })}
-                                                                    className="w-4 h-4 text-blue-600 rounded"
-                                                                />
-                                                                <label htmlFor="useDriver" className="text-xs font-bold text-slate-600 flex items-center gap-1 cursor-pointer">
-                                                                    <Car size={12} /> Using Dedicated Driver?
-                                                                </label>
-                                                            </div>
-                                                            {logForm.useDriver && (
-                                                                <div>
-                                                                    <label htmlFor="create-driver-cost" className="text-[10px] text-slate-500 font-bold block mb-1">Biaya Driver (Meals/Allowances)</label>
-                                                                    <input id="create-driver-cost" type="number" className="w-full border border-slate-300 rounded p-2 text-sm bg-slate-50 text-slate-900"
-                                                                        value={logForm.driverStoringCost} onChange={e => setLogForm({ ...logForm, driverStoringCost: Number(e.target.value) })} placeholder="0" />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-3 bg-purple-50 p-3 rounded border border-purple-200">
-                                                        <label htmlFor="create-supplier-select" className="text-xs font-bold text-purple-700 uppercase flex items-center gap-1"><ShoppingBag size={12} /> Vendor Details</label>
-                                                        <SearchableSelect label="Select Supplier" options={supplierOptions} value={logForm.supplierId} onChange={v => setLogForm({ ...logForm, supplierId: v })} required className="bg-white" id="create-supplier-select"/>
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            <label htmlFor="create-invoice" className="sr-only">Invoice Number</label>
-                                                            <input id="create-invoice" type="text" placeholder="Invoice #" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" value={logForm.externalInvoiceNumber} onChange={e => setLogForm({ ...logForm, externalInvoiceNumber: e.target.value })} />
-                                                            <label htmlFor="create-ext-cost" className="sr-only">Estimated Cost</label>
-                                                            <input id="create-ext-cost" type="number" placeholder="Est. Cost" className="w-full border border-slate-300 rounded p-2 text-sm bg-white text-slate-900" value={logForm.externalCost} onChange={e => setLogForm({ ...logForm, externalCost: Number(e.target.value) })} />
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                <button type="submit" className="w-full bg-slate-900 text-white py-3 rounded-lg shadow-md hover:bg-slate-800 font-bold transition-colors">Create Order</button>
-                                            </form>
-                                        )}
-                                    </div>
-                                </div>
+                                <MaintenanceView
+                                    filteredLogs={filteredLogs}
+                                    woFilterStatus={woFilterStatus}
+                                    setWoFilterStatus={setWoFilterStatus}
+                                    editingLog={editingLog}
+                                    setEditingLog={setEditingLog}
+                                    editForm={editForm}
+                                    setEditForm={setEditForm}
+                                    logForm={logForm}
+                                    setLogForm={setLogForm}
+                                    selectedEquipment={selectedEquipment}
+                                    prediction={prediction}
+                                    selectedTechToAdd={selectedTechToAdd}
+                                    setSelectedTechToAdd={setSelectedTechToAdd}
+                                    selectedPartId={selectedPartId}
+                                    setSelectedPartId={setSelectedPartId}
+                                    selectedPartQty={selectedPartQty}
+                                    setSelectedPartQty={setSelectedPartQty}
+                                    tempUsedParts={tempUsedParts}
+                                    partOptions={partOptions}
+                                    technicianOptions={technicianOptions}
+                                    supplierOptions={supplierOptions}
+                                    handleSubmitEdit={handleSubmitEdit}
+                                    handleDeleteLog={handleDeleteLog}
+                                    handleAddLog={handleAddLog}
+                                    handleAddPartToLog={handleAddPartToLog}
+                                    handleOpenEdit={handleOpenEdit}
+                                    getStatusColor={getStatusColor}
+                                />
                             ) : activeModalTab === 'parts' ? (
-                                <div className="p-6 overflow-y-auto bg-white">
-                                    <table className="w-full text-sm text-left border rounded-lg overflow-hidden">
-                                        <thead className="bg-slate-50 border-b border-slate-200">
-                                            <tr><th className="p-3 text-slate-600 font-bold">Date</th><th className="p-3 text-slate-600 font-bold">Type</th><th className="p-3 text-slate-600 font-bold">Part</th><th className="p-3 text-slate-600 font-bold">Qty</th></tr>
-                                        </thead>
-                                        <tbody>
-                                            {partsHistory.map(tx => (
-                                                <tr key={tx.id} className="border-b border-slate-100 hover:bg-slate-50">
-                                                    <td className="p-3 text-slate-600">{tx.date}</td>
-                                                    <td className="p-3"><span className="text-xs font-bold bg-slate-100 px-2 py-1 rounded text-slate-600">{tx.type}</span></td>
-                                                    <td className="p-3 font-medium text-slate-800">{spareParts.find(p => p.id === tx.partId)?.name || 'Unknown Part'}</td>
-                                                    <td className="p-3 font-bold text-slate-700">{tx.quantity}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <FuelLogs
+                                    partsHistory={partsHistory}
+                                    spareParts={spareParts}
+                                />
                             ) : activeModalTab === 'mutations' ? (
-                                <div className="p-6 overflow-y-auto h-full w-full">
-                                    <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                        <ArrowRightLeft size={18} /> Mutation History
-                                    </h4>
-                                    <div className="border rounded-lg overflow-hidden">
-                                        <table className="w-full text-sm text-left">
-                                            <thead className="bg-slate-50 text-slate-600 font-bold border-b">
-                                                <tr>
-                                                    <th className="px-4 py-3">Date</th>
-                                                    <th className="px-4 py-3">Type</th>
-                                                    <th className="px-4 py-3">Route</th>
-                                                    <th className="px-4 py-3">Reference</th>
-                                                    <th className="px-4 py-3">HM</th>
-                                                    <th className="px-4 py-3">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100">
-                                                {mutationHistory.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan={6} className="px-4 py-8 text-center text-slate-400">No mutation history found.</td>
-                                                    </tr>
-                                                ) : (
-                                                    mutationHistory.map((mut: any) => (
-                                                        <tr key={mut.id} className="hover:bg-slate-50">
-                                                            <td className="px-4 py-3 font-mono text-slate-600">{mut.departureDate}</td>
-                                                            <td className="px-4 py-3">
-                                                                <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded ${mut.type === 'ACQUISITION' ? 'bg-green-100 text-green-700' :
-                                                                    mut.type === 'TRANSFER' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
-                                                                    }`}>
-                                                                    {mut.type}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-4 py-3">
-                                                                <div className="flex items-center gap-2 text-xs">
-                                                                    <span className="text-slate-500 bg-slate-100 px-1.5 rounded">{mut.sourceLocation || '-'}</span>
-                                                                    <span className="text-slate-300">➝</span>
-                                                                    <span className="font-bold text-slate-700">{mut.targetLocation || '-'}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-4 py-3 text-slate-600">{mut.referenceDocument}</td>
-                                                            <td className="px-4 py-3 font-mono">{mut.mutationHM?.toLocaleString()}</td>
-                                                            <td className="px-4 py-3">
-                                                                {mut.status === 'CANCELLED' ? (
-                                                                    <span className="flex items-center gap-1 text-red-600 text-xs font-bold">
-                                                                        <X size={14} /> Cancelled
-                                                                    </span>
-                                                                ) : (mut.arrivalDate || mut.status === 'COMPLETED') ? (
-                                                                    <span className="flex items-center gap-1 text-green-600 text-xs font-bold">
-                                                                        <CheckCircle size={14} /> Arrived
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="flex items-center gap-1 text-amber-600 text-xs font-bold">
-                                                                        <Truck size={14} /> In Transit
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                                <DailyLogs
+                                    mutationHistory={mutationHistory}
+                                />
                             ) : (
                                 // FINANCIAL TAB
                                 <div className="p-6 overflow-y-auto w-full bg-white">
@@ -1165,16 +755,12 @@ const FleetView: React.FC = () => {
 
                                     {/* PROFESSIONAL PDF EXPORT TEMPLATE (HIDDEN ON SCREEN) */}
                                     <div className="hidden">
-                                        {/* Wrapper for ref */}
                                         <div ref={printRef}>
                                             <div className="p-8 max-w-[210mm] mx-auto bg-white text-slate-900 font-sans min-h-[297mm] flex flex-col relative" style={{ minHeight: '297mm' }}>
 
-                                                {/* CONTENT WRAPPER (Takes available space) */}
                                                 <div className="flex-1">
-                                                    {/* LETTERHEAD Section */}
                                                     <div className="flex justify-between items-start mb-2">
                                                         <div className="flex items-center gap-6">
-                                                            {/* Stylized Logo "JpM" */}
                                                             <div className="flex flex-col items-center leading-none">
                                                                 <div className="flex items-baseline font-black tracking-tighter text-red-600" style={{ fontFamily: 'Arial, sans-serif' }}>
                                                                     <span className="text-6xl">J</span>
@@ -1183,17 +769,14 @@ const FleetView: React.FC = () => {
                                                                 </div>
                                                             </div>
 
-                                                            {/* Vertical Divider */}
                                                             <div className="h-16 w-px bg-slate-300"></div>
 
-                                                            {/* Company Name */}
                                                             <div className="flex flex-col justify-center h-full pt-1">
                                                                 <h1 className="text-2xl font-extrabold text-red-600 tracking-tight leading-none">PT JAVA PERSADA MANDIRI</h1>
                                                                 <p className="text-xs font-bold text-blue-900 tracking-[0.35em] mt-1">GENERAL CONTRACTOR</p>
                                                             </div>
                                                         </div>
 
-                                                        {/* Address Block - Right Aligned & Proportional */}
                                                         <div className="text-right text-[9px] text-slate-700 leading-tight font-medium">
                                                             <p className="font-bold text-slate-900 mb-1">HEAD OFFICE</p>
                                                             <p>Jl.Trikora RT.11 RW.02 No.57</p>
@@ -1207,11 +790,9 @@ const FleetView: React.FC = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* Double Line Border */}
                                                     <div className="w-full border-t-4 border-slate-900 mb-0.5"></div>
                                                     <div className="w-full border-t border-slate-400 mb-8"></div>
 
-                                                    {/* Report Title */}
                                                     <div className="mb-6 flex justify-between items-end">
                                                         <div>
                                                             <h2 className="text-xl font-bold uppercase text-slate-900">Asset Reliability & Cost Report</h2>
@@ -1223,7 +804,6 @@ const FleetView: React.FC = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* Reliability Dashboard */}
                                                     {reliabilityData && (
                                                         <div className="grid grid-cols-4 gap-4 mb-6">
                                                             <div className={`border p-4 rounded ${reliabilityData.pa >= 85 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} `}>
@@ -1246,7 +826,6 @@ const FleetView: React.FC = () => {
                                                         </div>
                                                     )}
 
-                                                    {/* Cost Summary Grid */}
                                                     <div className="grid grid-cols-4 gap-4 mb-8">
                                                         <div className="border border-slate-200 p-4 rounded bg-slate-50">
                                                             <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Total Period Cost</span>
@@ -1266,13 +845,11 @@ const FleetView: React.FC = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* Inferential Visuals */}
                                                     <div className="mb-8 p-4 border border-slate-200 rounded">
                                                         <h3 className="text-xs font-bold text-slate-500 uppercase mb-4 flex items-center gap-2">
                                                             <PieChart size={14} /> Operational Cost Composition
                                                         </h3>
 
-                                                        {/* CSS Stacked Bar Chart */}
                                                         <div className="w-full h-8 bg-slate-100 rounded flex overflow-hidden mb-2">
                                                             {ratios.partsPct > 0 && (
                                                                 <div style={{ width: `${ratios.partsPct}% ` }} className="bg-blue-600 h-full flex items-center justify-center text-[10px] font-bold text-white relative group">
@@ -1297,7 +874,6 @@ const FleetView: React.FC = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* DETAILED MAINTENANCE HISTORY TABLE (NEW) */}
                                                     <div className="mb-8 break-inside-avoid">
                                                         <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">Maintenance Activity Log</h3>
                                                         <table className="w-full text-[10px] border-collapse border border-slate-200">
@@ -1358,7 +934,6 @@ const FleetView: React.FC = () => {
                                                         </table>
                                                     </div>
 
-                                                    {/* Descriptive Ledger */}
                                                     {financialData && (
                                                         <div className="break-inside-avoid">
                                                             <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">Detailed Expenditure Ledger</h3>
@@ -1392,7 +967,6 @@ const FleetView: React.FC = () => {
                                                     )}
                                                 </div>
 
-                                                {/* FOOTER SECTION: Pushed to bottom via flex-col & mt-auto */}
                                                 <div className="mt-auto pt-8 break-inside-avoid w-full">
                                                     <div className="grid grid-cols-3 gap-8 text-center">
                                                         <div>

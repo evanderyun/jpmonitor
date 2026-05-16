@@ -4,6 +4,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { InventoryTxType, SparePart, GoodsShipment, ShipmentItem, InventoryTransaction } from '../types';
 import { PackageSearch, AlertTriangle, RefreshCw, Plus, Filter, Archive, Search, Save, BarChart3, PieChart as PieIcon, Trash2, Truck, Printer, DollarSign, CalendarClock, History } from 'lucide-react';
 import SearchableSelect from './SearchableSelect';
+import InventoryDashboard from './InventoryDashboard';
+import PartList from './PartList';
+import InventoryTransactions from './InventoryTransactions';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const InventoryView: React.FC = () => {
@@ -548,254 +551,34 @@ const InventoryView: React.FC = () => {
             {!loading && !error && activeTab === 'inventory' && (
                 <>
                     {/* KPI Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-                            <div className="p-3 bg-blue-100 text-blue-600 rounded-full">
-                                <PackageSearch size={24} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-slate-900">{totalItems}</div>
-                                <div className="text-sm text-slate-500">Unique SKU Items</div>
-                            </div>
-                        </div>
-                        <div className={`bg-white p-5 rounded-xl shadow-sm border ${lowStockItems > 0 ? 'border-red-200 bg-red-50' : 'border-slate-200'} flex items-center gap-4`}>
-                            <div className={`p-3 rounded-full ${lowStockItems > 0 ? 'bg-red-200 text-red-700' : 'bg-green-100 text-green-600'}`}>
-                                <AlertTriangle size={24} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-slate-900">{lowStockItems}</div>
-                                <div className="text-sm text-slate-500">Low Stock Alerts</div>
-                            </div>
-                        </div>
-                        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-                            <div className="p-3 bg-indigo-100 text-indigo-600 rounded-full">
-                                <Archive size={24} />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-slate-900">
-                                    Rp {(totalValue / 1000000).toLocaleString()} M
-                                </div>
-                                <div className="text-sm text-slate-500">Total Inventory Value</div>
-                            </div>
-                        </div>
-                    </div>
+                    <InventoryDashboard
+                        totalItems={totalItems}
+                        lowStockItems={lowStockItems}
+                        totalValue={totalValue}
+                    />
 
                     {/* Inventory Table */}
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                            <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                                <Filter size={18} className="text-slate-400" /> Master Stock List
-                            </h3>
-                            {/* Master Search */}
-                            <div className="relative">
-                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <label htmlFor="master-search-input" className="sr-only">Search part no, name, loc...</label>
-                                <input
-                                    id="master-search-input"
-                                    type="text"
-                                    placeholder="Search part no, name, loc..."
-                                    className="text-sm border border-slate-300 rounded-lg pl-9 pr-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                                    value={masterSearchTerm}
-                                    onChange={(e) => setMasterSearchTerm(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                        <div className="overflow-x-auto max-h-[400px]">
-                            <table className="w-full text-sm text-left">
-                                <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 sticky top-0">
-                                    <tr>
-                                        <th className="px-6 py-4">Part Number</th>
-                                        <th className="px-6 py-4">Description</th>
-                                        <th className="px-6 py-4">Category</th>
-                                        <th className="px-6 py-4 text-right">Stock</th>
-                                        <th className="px-6 py-4">Location</th>
-                                        <th className="px-6 py-4 text-center">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {filteredParts.map((part) => (
-                                        <tr key={part.id} className="hover:bg-slate-50 transition-colors group">
-                                            <td className="px-6 py-4 font-mono text-slate-700 font-medium">{part.partNumber}</td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-slate-800 font-medium">{part.name}</div>
-                                                <div className="text-xs text-slate-400">Brand: {part.brand || 'N/A'}</div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="inline-flex px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-600">
-                                                    {part.category}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className={`font-bold text-lg ${part.currentStock <= part.minStockLevel ? 'text-red-600' : 'text-slate-800'}`}>
-                                                    {part.currentStock.toLocaleString()}
-                                                    <span className="text-xs font-normal text-slate-500 ml-1">{part.unit}</span>
-                                                </div>
-                                                {part.currentStock <= part.minStockLevel && (
-                                                    <span className="text-[10px] text-red-500 font-bold uppercase animate-pulse">Reorder Needed</span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-500">
-                                                <div className="font-medium">{getLocationName(part.locationId)}</div>
-                                                <div className="text-xs font-mono text-slate-400">{part.location}</div>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <button
-                                                        onClick={() => openTxModal(part)}
-                                                        className="text-blue-600 hover:text-blue-800 font-medium text-xs border border-blue-200 hover:bg-blue-50 px-3 py-1 rounded-lg transition-colors"
-                                                    >
-                                                        Transaction
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
-                                                            handleDelete(part.id, part.partNumber);
-                                                        }}
-                                                        className="text-red-500 bg-red-50 border border-red-100 hover:bg-red-100 hover:text-red-700 p-1.5 rounded transition-all cursor-pointer"
-                                                        title="Delete Item"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {filteredParts.length === 0 && (
-                                        <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-400">No items match your search.</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <PartList
+                        parts={parts}
+                        filteredParts={filteredParts}
+                        masterSearchTerm={masterSearchTerm}
+                        onMasterSearchTermChange={setMasterSearchTerm}
+                        onTransaction={openTxModal}
+                        onDelete={handleDelete}
+                        getLocationName={getLocationName}
+                    />
 
                     {/* Transaction History Log */}
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                            <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                                <History size={18} className="text-slate-400" /> Transaction History Log
-                            </h3>
-                            {/* Transaction Filters */}
-                            <div className="flex gap-2 items-center">
-                                <div className="relative">
-                                    <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <label htmlFor="tx-search-input" className="sr-only">Search transactions...</label>
-                                    <input
-                                        id="tx-search-input"
-                                        type="text"
-                                        placeholder="Search transactions..."
-                                        className="text-xs border border-slate-300 rounded-lg pl-7 pr-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 w-48"
-                                        value={filterText}
-                                        onChange={(e) => setFilterText(e.target.value)}
-                                    />
-                                </div>
-                                <label htmlFor="tx-type-filter" className="sr-only">Filter Transaction Type</label>
-                                <select
-                                    id="tx-type-filter"
-                                    className="text-xs border border-slate-300 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                                    value={filterType}
-                                    onChange={(e) => setFilterType(e.target.value)}
-                                >
-                                    <option value="ALL">All Types</option>
-                                    <option value={InventoryTxType.USAGE}>Usage</option>
-                                    <option value={InventoryTxType.PURCHASE}>Purchase</option>
-                                    <option value={InventoryTxType.CANNIBAL_HARVEST}>Cannibalize</option>
-                                    <option value={InventoryTxType.RETURN_VENDOR}>Return</option>
-                                    <option value={InventoryTxType.RESTOCK_UNUSED}>Restock</option>
-                                    <option value={InventoryTxType.TRANSFER_OUT}>Transfer Out</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="overflow-x-auto max-h-[500px]">
-                            <table className="w-full text-sm text-left">
-                                <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 sticky top-0">
-                                    <tr>
-                                        <th className="px-6 py-3">Date</th>
-                                        <th className="px-6 py-3">Part</th>
-                                        <th className="px-6 py-3">Type</th>
-                                        <th className="px-6 py-3 text-right">Qty</th>
-                                        <th className="px-6 py-3">Ref. / Equipment</th>
-                                        <th className="px-6 py-3">Notes</th>
-                                        <th className="px-6 py-3">By</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {filteredTransactions.map((tx) => {
-                                        const part = parts.find(p => p.id === tx.partId);
-                                        const equipment = tx.equipmentId ? equipmentAPI.getEquipmentById(tx.equipmentId) : ''; // This is a promise, won't render directly. Fixed below.
-                                        // In real app, we should map equipment ID to Code from the loaded 'equipment' state, not call API in loop.
-                                        const equipmentCode = equipment.find((e: any) => e.id === tx.equipmentId)?.code || tx.equipmentId;
-
-                                        // Color coding based on transaction type
-                                        let typeBadgeClass = 'bg-slate-100 text-slate-600';
-                                        let qtyClass = 'text-slate-900';
-                                        let icon = '';
-
-                                        switch (tx.type) {
-                                            case InventoryTxType.PURCHASE:
-                                                typeBadgeClass = 'bg-green-100 text-green-700';
-                                                qtyClass = 'text-green-600';
-                                                icon = '⬆';
-                                                break;
-                                            case InventoryTxType.USAGE:
-                                                typeBadgeClass = 'bg-blue-100 text-blue-700';
-                                                qtyClass = 'text-blue-600';
-                                                icon = '⬇';
-                                                break;
-                                            case InventoryTxType.CANNIBAL_HARVEST:
-                                                typeBadgeClass = 'bg-amber-100 text-amber-700';
-                                                qtyClass = 'text-amber-600';
-                                                icon = '♻';
-                                                break;
-                                            case InventoryTxType.RETURN_VENDOR:
-                                                typeBadgeClass = 'bg-red-100 text-red-700';
-                                                qtyClass = 'text-red-600';
-                                                icon = '↩';
-                                                break;
-                                            case InventoryTxType.RESTOCK_UNUSED:
-                                                typeBadgeClass = 'bg-purple-100 text-purple-700';
-                                                qtyClass = 'text-purple-600';
-                                                icon = '↪';
-                                                break;
-                                            case InventoryTxType.TRANSFER_OUT:
-                                                typeBadgeClass = 'bg-indigo-100 text-indigo-700';
-                                                qtyClass = 'text-indigo-600';
-                                                icon = '📤';
-                                                break;
-                                        }
-
-                                        return (
-                                            <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
-                                                <td className="px-6 py-3 text-slate-600 font-medium">{tx.date}</td>
-                                                <td className="px-6 py-3">
-                                                    <div className="font-medium text-slate-800">{part?.name || 'Unknown'}</div>
-                                                    <div className="text-xs text-slate-400 font-mono">{part?.partNumber}</div>
-                                                </td>
-                                                <td className="px-6 py-3">
-                                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold ${typeBadgeClass}`}>
-                                                        <span>{icon}</span> {tx.type}
-                                                    </span>
-                                                </td>
-                                                <td className={`px-6 py-3 text-right font-bold ${qtyClass}`}>
-                                                    {tx.type === InventoryTxType.USAGE || tx.type === InventoryTxType.RETURN_VENDOR || tx.type === InventoryTxType.TRANSFER_OUT ? '-' : '+'}{tx.quantity} <span className="text-xs font-normal text-slate-500">{part?.unit}</span>
-                                                </td>
-                                                <td className="px-6 py-3">
-                                                    <div className="text-slate-700 font-mono text-xs">{tx.referenceId || '-'}</div>
-                                                    {equipmentCode && <div className="text-xs text-slate-500">Unit: {String(equipmentCode)}</div>}
-                                                </td>
-                                                <td className="px-6 py-3 text-slate-600 text-xs max-w-xs truncate">{tx.notes || '-'}</td>
-                                                <td className="px-6 py-3 text-slate-500 text-xs">{tx.performedBy}</td>
-                                            </tr>
-                                        );
-                                    })}
-                                    {filteredTransactions.length === 0 && (
-                                        <tr><td colSpan={7} className="px-6 py-8 text-center text-slate-400">No transactions match your filters.</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <InventoryTransactions
+                        transactions={transactions}
+                        filteredTransactions={filteredTransactions}
+                        parts={parts}
+                        equipment={equipment}
+                        filterText={filterText}
+                        filterType={filterType}
+                        onFilterTextChange={setFilterText}
+                        onFilterTypeChange={setFilterType}
+                    />
                 </>
             )}
 
