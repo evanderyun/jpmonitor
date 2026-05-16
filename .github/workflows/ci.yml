@@ -1,0 +1,111 @@
+# ─────────────────────────────────────────────────────────
+# JP Monitor — CI/CD Pipeline
+# Triggers on push to main and pull requests
+# Builds & tests both backend (Java 21 / Maven) and
+# frontend (Node 20 / Vite + Vitest), with optional
+# Docker image builds.
+# ─────────────────────────────────────────────────────────
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # ── Docker ──────────────────────────────────────────────
+  DOCKER_REGISTRY: ghcr.io
+  DOCKER_IMAGE_BACKEND: ${{ github.repository }}-backend
+  DOCKER_IMAGE_FRONTEND: ${{ github.repository }}-frontend
+
+jobs:
+  # ════════════════════════════════════════════════════════
+  # BACKEND — Java 21, Maven multi-module
+  # ════════════════════════════════════════════════════════
+  backend:
+    name: Backend (Java 21 / Maven)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Compile backend
+        run: |
+          cd backend-java
+          mvn compile -pl api -am --batch-mode
+
+      - name: Run backend tests
+        run: |
+          cd backend-java
+          mvn test -pl api -am --batch-mode
+
+      # Optional: package the backend jar for downstream jobs
+      - name: Package backend (skip tests)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd backend-java
+          mvn package -pl api -am -DskipTests --batch-mode
+
+      # Optional: Docker build for backend
+      - name: Build backend Docker image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker build \
+            -t ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_BACKEND }}:${{ github.sha }} \
+            -t ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_BACKEND }}:latest \
+            -f backend-java/Dockerfile \
+            backend-java
+
+  # ════════════════════════════════════════════════════════
+  # FRONTEND — Node 20, Vite + Vitest + ESLint
+  # ════════════════════════════════════════════════════════
+  frontend:
+    name: Frontend (Node 20 / Vite)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+
+      # Optional: Docker build for frontend
+      - name: Build frontend Docker image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker build \
+            -t ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_FRONTEND }}:${{ github.sha }} \
+            -t ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_FRONTEND }}:latest \
+            -f Dockerfile.frontend \
+            .
