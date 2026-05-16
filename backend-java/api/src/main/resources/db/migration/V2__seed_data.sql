@@ -4,12 +4,17 @@
 -- ============================================================================
 -- ROLES
 -- ============================================================================
-INSERT INTO roles (id, code, name, description) VALUES
-    ('a0000000-0000-0000-0000-000000000001', 'ROLE_SUPER_ADMIN', 'Super Admin', 'Akses penuh ke seluruh sistem'),
-    ('a0000000-0000-0000-0000-000000000002', 'ROLE_ADMIN', 'Admin', 'Akses administrasi sistem'),
-    ('a0000000-0000-0000-0000-000000000003', 'ROLE_MANAGER', 'Manager', 'Akses manajerial dan laporan'),
-    ('a0000000-0000-0000-0000-000000000004', 'ROLE_ENGINEER', 'Engineer', 'Akses teknis dan maintenance'),
-    ('a0000000-0000-0000-0000-000000000005', 'ROLE_OPERATOR', 'Operator', 'Akses operasional dasar');
+INSERT INTO roles (id, code, name, description, permissions) VALUES
+    ('a0000000-0000-0000-0000-000000000001', 'ROLE_SUPER_ADMIN', 'Super Admin', 'Akses penuh ke seluruh sistem',
+     '["*"]'::jsonb),
+    ('a0000000-0000-0000-0000-000000000002', 'ROLE_ADMIN', 'Admin', 'Akses administrasi sistem',
+     '["READ_*", "WRITE_MASTER_DATA", "WRITE_INVENTORY", "WRITE_FLEET", "WRITE_PRODUCTION", "MANAGE_USERS"]'::jsonb),
+    ('a0000000-0000-0000-0000-000000000003', 'ROLE_MANAGER', 'Manager', 'Akses manajerial dan laporan',
+     '["READ_*", "WRITE_INVENTORY", "WRITE_FLEET", "WRITE_PRODUCTION", "VIEW_REPORTS"]'::jsonb),
+    ('a0000000-0000-0000-0000-000000000004', 'ROLE_ENGINEER', 'Engineer', 'Akses teknis dan maintenance',
+     '["READ_EQUIPMENT", "READ_INVENTORY", "WRITE_WORK_ORDER", "WRITE_MAINTENANCE"]'::jsonb),
+    ('a0000000-0000-0000-0000-000000000005', 'ROLE_OPERATOR', 'Operator', 'Akses operasional dasar',
+     '["READ_EQUIPMENT", "WRITE_DAILY_LOG", "READ_PRODUCTION"]'::jsonb);
 
 -- ============================================================================
 -- DEFAULT PROJECT

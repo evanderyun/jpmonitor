@@ -9,6 +9,7 @@ CREATE TABLE roles (
     code VARCHAR(50) UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
     description TEXT,
+    permissions JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
