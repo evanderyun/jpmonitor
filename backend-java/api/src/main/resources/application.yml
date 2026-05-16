@@ -54,6 +54,20 @@ app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://jpmonitor.duckdns.org}
 
+# Spring AI MCP Server Configuration
+spring:
+  ai:
+    mcp:
+      server:
+        name: jpmonitor-erp
+        version: 1.0.0
+
+# Hermes AI API Configuration
+hermes:
+  api:
+    url: http://localhost:8642
+    key: hermes-jpmonitor-dev
+
 # Actuator (health checks)
 management:
   endpoints:
