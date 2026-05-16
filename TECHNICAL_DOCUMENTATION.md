@@ -1,145 +1,276 @@
-# JpMonitor ERP - Technical Documentation
+# JpMonitor ERP — Technical Documentation
 
-**Version:** 2.0
-**Last Updated:** November 29, 2025
-**Status:** Production Ready (Security Hardened)
+**Version:** 3.0
+**Last Updated:** May 16, 2026
+**Status:** Production Ready
 
 ---
 
 ## 1. System Architecture
 
-The ERP system follows a classic **Three-Tier Architecture**:
+The ERP system follows a **Modern Three-Tier Architecture** with AI integration:
 
-*   **Frontend (Presentation Layer):**
-    *   **Technology:** React.js (Vite)
-    *   **Language:** TypeScript
-    *   **Communication:** REST API via `fetch` (abstracted in `services/api.ts`)
-    *   **Configuration:** Environment variables (`.env.local`) for API URLs.
-
-*   **Backend (Logic Layer):**
-    *   **Technology:** Node.js with Express
-    *   **Language:** JavaScript (CommonJS)
-    *   **Security:** `helmet` (Headers), `cors` (Origin Control), `express-rate-limit` (DDoS Protection).
-    *   **Auth:** JWT (JSON Web Tokens) for stateless authentication.
-    *   **Role Management:** RBAC (Role-Based Access Control) with granular permissions.
-
-*   **Database (Data Layer):**
-    *   **Technology:** PostgreSQL 14+
-    *   **Schema:** Relational Normalized Schema (3NF)
-    *   **Integrity:** Foreign Keys, Check Constraints (Non-negative stock), ACID Transactions.
-
----
-
-## 2. Security Implementation
-
-The system has been audited and hardened against common OWASP vulnerabilities.
-
-### 2.1. Middleware Stack
-| Middleware | Purpose | Configuration |
-| :--- | :--- | :--- |
-| **Helmet** | Secure HTTP Headers | Hides `X-Powered-By`, sets `Strict-Transport-Security`, etc. |
-| **CORS** | Cross-Origin Resource Sharing | Restricted to `FRONTEND_URL` only. |
-| **Rate Limit** | Brute-force Protection | Max 100 requests / 15 mins per IP. |
-| **XSS Clean** | Input Sanitization | Strips malicious scripts from request body. |
-| **HPP** | Parameter Pollution | Prevents duplicate query parameter attacks. |
-
-### 2.2. Data Protection
-*   **UUIDs:** Used for all IDs (`v4`) instead of predictable auto-increment integers or `Date.now()`.
-*   **Secret Management:** All keys (`JWT_SECRET`, `GEMINI_API_KEY`, `DB_PASSWORD`) are moved to `.env`.
-*   **API Proxy:** Frontend never calls 3rd party APIs (Gemini) directly; it requests the Backend, which acts as a secure proxy.
-
----
-
-## 3. Database Schema (Key Modules)
-
-### 3.1. Inventory & Supply Chain
-*   **`spare_parts`**: Master catalog.
-    *   *Constraint:* `current_stock >= 0` (Prevents negative inventory).
-    *   *Relation:* Linked to `suppliers` and `locations`.
-*   **`inventory_transactions`**: Immutable ledger of stock movements.
-    *   *Integrity:* `ON DELETE RESTRICT` ensures used parts cannot be deleted from catalog.
-
-### 3.2. Maintenance & Engineering
-*   **`equipment`**: Fleet master data.
-    *   *Constraint:* `hour_meter >= 0`.
-*   **`maintenance_records`**: Unified service history.
-    *   *Feature:* Supports **Hour Meter Reset** logic (`hm_reset_occurred`) for engine replacements.
-    *   *Relation:* Links to `work_orders`, `employees` (mechanics), and `suppliers` (external service).
-
-### 3.3. Human Resources
-*   **`users`**: System access.
-*   **`roles`**: Permission sets (`admin`, `manager`, `mechanic`).
-*   **`employees`**: HR data, linked to users but separate entities.
-
----
-
-## 4. Setup & Deployment
-
-### 4.1. Prerequisites
-*   Node.js v18+
-*   PostgreSQL v14+
-
-### 4.2. Environment Variables
-Create a `.env` file in the `server/` directory:
-```env
-PORT=5001
-DB_HOST=localhost
-DB_USER=jpm_user
-DB_PASSWORD=your_secure_password
-DB_NAME=jpm_db
-JWT_SECRET=complex_secret_key
-FRONTEND_URL=http://localhost:3000
-GEMINI_API_KEY=your_key_here
+```
+┌─────────────────────────────────────────────────┐
+│              Frontend (React 19)                 │
+│           Vite 6 + TypeScript + Tailwind         │
+│           React Router DOM (URL routing)         │
+│           React.lazy code splitting              │
+│           TanStack React Query (partial)         │
+└──────────────────┬──────────────────────────────┘
+                   │ REST API (JSON)
+                   ▼
+┌─────────────────────────────────────────────────┐
+│        Backend — Spring Boot 3.4.4 / Java 21     │
+│         Maven multi-module (3 modules)           │
+│                                                  │
+│  ├─ api/         REST controllers                │
+│  ├─ domains/     Entities + Repositories + DTOs  │
+│  └─ platform/    Security, JPA config, common     │
+│                                                  │
+│  Auth: JWT stateless, RBAC with JSONB permissions│
+│  DB: PostgreSQL 16, Flyway migrations            │
+└──────────────────┬──────────────────────────────┘
+                   │ HTTP / SSE
+                   ▼
+┌─────────────────────────────────────────────────┐
+│    Hermes Agent (AI Chat) — API Server :8642    │
+│                                                  │
+│  ─ MCP client → Spring Boot @Tool annotations   │
+│  ─ EverOS memory (long-term memory)              │
+│  ─ Skills + Web search (Firecrawl)               │
+└─────────────────────────────────────────────────┘
 ```
 
-### 4.3. Database Initialization
-Run the schema script to create tables and default admin user:
+### Key Tech Stack
+
+| Layer | Technology | Notes |
+|-------|-----------|-------|
+| **Frontend** | React 19, TypeScript 5, Vite 6 | Tailwind CSS 4, recharts |
+| **Backend** | Spring Boot 3.4.4, Java 21 | Virtual threads (Loom) |
+| **AI Chat** | Hermes Agent (API Server) | MCP protocol with Spring AI |
+| **Database** | PostgreSQL 16 | Schema in Flyway V1 |
+| **Auth** | JWT + BCrypt + RBAC | JSONB permissions |
+| **CI/CD** | GitHub Actions | 2 parallel jobs |
+
+---
+
+## 2. Backend Architecture
+
+### Module Structure
+
+```
+backend-java/
+├── pom.xml                          # Root - multi-module Maven
+├── platform/
+│   └── src/main/java/com/jpmonitor/platform/
+│       ├── common/                  # BaseEntity, BaseImmutableEntity
+│       ├── security/                # JwtUtils, SecurityConfig, JwtFilter
+│       └── exception/               # ResourceNotFoundException, etc.
+├── domains/
+│   └── src/main/java/com/jpmonitor/domains/
+│       ├── core/                    # User, Role, Project, Location, AuditLog
+│       ├── fleet/                   # Equipment, WorkOrder, Maintenance, Fuel
+│       ├── production/              # Pit, ProductionRecord, Stockpile, Hauling
+│       ├── inventory/               # SparePart, InventoryTransaction
+│       ├── finance/                 # CashAccount, Payment, AP
+│       ├── logistics/               # GoodsShipment, ShipmentItem
+│       ├── hr/                      # Employee
+│       ├── hse/                     # Incident, Investigation
+│       └── procurement/             # Supplier, ExternalService
+└── api/
+    └── src/main/java/com/jpmonitor/api/
+        ├── controller/              # 17 REST controllers
+        ├── dto/                     # ChatRequest/ChatResponse DTOs
+        └── mcp/                     # @Tool classes for AI integration
+```
+
+### Database (PostgreSQL 16)
+
+Managed via **Flyway** (11.x):
+- `V1__initial_schema.sql` — 30+ tables with FKs, constraints, indexes, generated columns
+- `V2__seed_data.sql` — 5 role levels, admin user, default project/locations
+
+Key schema features:
+- All UUID primary keys (auto-generated)
+- Auto-generated computed columns (`stripping_ratio`, `total_cost`, `outstanding_amount`)
+- JSONB for `roles.permissions` and `suppliers.api_auth_config`
+- Audit trail via `audit_logs` table (immutable records)
+
+### API Endpoints
+
+| Module | Endpoints | Auth |
+|--------|-----------|------|
+| Auth | `POST /api/auth/login`, `GET /api/auth/me` | Public / JWT |
+| Fleet | `GET/POST/PUT/DELETE /api/fleet/equipment`, work orders, daily logs, fuel, maintenance, mutations | JWT + RBAC |
+| Inventory | `GET/POST/PUT/DELETE /api/inventory/parts`, transactions | JWT + RBAC |
+| Production | `GET/POST/PUT /api/production/*` | JWT + RBAC |
+| Finance | `GET/POST/PUT /api/finance/*` | JWT |
+| Logistics | `GET/POST/PUT /api/logistics/*` | JWT |
+| HR | `GET/POST/PUT /api/employees` | JWT |
+| HSE | `GET/POST/PUT /api/hse/*` | JWT |
+| Audit | `GET /api/audit?module=&page=&size=` | JWT |
+| Chat | `POST /api/chat` → Hermes API Server | JWT |
+
+### Security
+
+| Feature | Implementation |
+|---------|---------------|
+| Auth | JWT stateless (24h expiry), BCrypt password hashing |
+| RBAC | Role codes as Spring Security authorities + JSONB permissions |
+| Rate limiting | 10 req/min/IP on login endpoint |
+| CORS | Whitelist: localhost:3000, :3002, :5173, jpmonitor.duckdns.org |
+| Headers | HSTS, Content Security Policy via Spring Security defaults |
+
+---
+
+## 3. Frontend Architecture
+
+### Project Structure
+
+```
+src/ (project root)
+├── components/
+│   ├── ui/              # Reusable UI primitives (Card, Badge, Modal, etc.)
+│   ├── FleetView.tsx    # Fleet management (1,003 lines - refactored)
+│   ├── EquipmentList.tsx, MaintenanceView.tsx, FuelLogs.tsx, DailyLogs.tsx
+│   ├── InventoryView.tsx# Inventory management (1,698 lines - refactored)
+│   ├── InventoryDashboard.tsx, PartList.tsx, InventoryTransactions.tsx
+│   ├── SupplierListEmbed.tsx
+│   ├── DashboardView.tsx# Executive dashboard with KPIs
+│   ├── ProductionView.tsx, EmployeeView.tsx, SupplierView.tsx
+│   ├── MutationView.tsx, HSEView.tsx, LocationView.tsx
+│   ├── DebtView.tsx, TimesheetView.tsx, AuditLogView.tsx
+│   ├── Navigation.tsx   # Sidebar navigation with React Router NavLink
+│   ├── AIChatWidget.tsx # Floating AI chat widget
+│   └── LoginPage.tsx, ErrorBoundary.tsx, SearchableSelect.tsx
+├── services/
+│   ├── api.ts           # All REST API service objects (13 domains)
+│   └── authStorage.ts   # JWT token persistence in localStorage
+├── lib/
+│   └── http.ts          # fetchJson wrapper (auth, dedup, error handling)
+├── hooks/               # React hooks
+├── utils/               # Helper functions (transformer: snake_case↔camelCase)
+├── types.ts             # TypeScript interfaces (319 lines)
+├── App.tsx              # Auth gate + React Router Routes
+├── index.tsx            # ReactDOM.createRoot + BrowserRouter
+└── config.ts            # Environment configuration
+```
+
+### Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **No state management library** | React context + prop drilling sufficient for ERP scope |
+| **React.lazy code splitting** | Each view loaded on-demand (smaller initial bundle) |
+| **Manual CRUD patterns** | Consistent REST calls instead of ORM-like abstraction |
+| **snake_case↔camelCase transformer** | Bridge between PostgreSQL naming convention and TS |
+| **AIChatWidget standalone** | Self-contained floating widget, not tied to views |
+
+### AI Chat Widget
+
+The chatbot (/api/chat) routes through:
+```
+AIChatWidget → POST /api/chat → ChatController (Java)
+  → inject user context (name, role, company)
+  → proxy to Hermes API Server :8642
+  ↔ MCP tools for ERP operations
+  ↔ EverOS memory for conversation history
+```
+
+---
+
+## 4. AI Integration (Hermes Agent)
+
+### Architecture
+
+```
+Hermes API Server (:8642)
+├── MCP Client → Spring Boot MCP Server (SSE :8080/mcp)
+│   ├── @Tool cari_equipment(code, status, location)
+│   ├── @Tool buat_work_order(equipmentCode, description, priority)
+│   ├── @Tool status_armada()
+│   ├── @Tool cek_stok_sparepart(keyword)
+│   ├── @Tool laporan_stok_menipis()
+│   ├── @Tool rekap_produksi(pitCode, startDate, endDate)
+│   ├── @Tool cari_user(keyword)
+│   └── @Tool lokasi_project(keyword)
+├── EverOS Memory (long-term)
+├── Skills (self-evolving)
+└── Firecrawl (web search)
+```
+
+### Setup
+
 ```bash
-psql -h localhost -U jpm_user -d jpm_db -f server/db/schema.sql
+# .env
+API_SERVER_ENABLED=true
+API_SERVER_KEY=hermes-jpmonitor-dev
+API_SERVER_CORS_ORIGINS=http://localhost:3002
+
+# Start
+hermes gateway
 ```
 
-### 4.4. Running the System
-**Backend:**
+---
+
+## 5. Deployment
+
+### Docker Compose
+
+```yaml
+services:
+  frontend:   # nginx + built files
+  backend:    # Spring Boot JAR
+  database:   # PostgreSQL 16
+```
+
+### Prerequisites
+
+- Java 21 (Temurin)
+- Node.js 20
+- PostgreSQL 16
+- Hermes Agent (for AI chat)
+
+### Build & Run
+
 ```bash
-cd server
-npm install
-npm start
+# Backend
+cd backend-java && mvn package -pl api -am -DskipTests
+
+# Frontend
+npm run build
+
+# Docker
+docker compose up -d
 ```
 
-**Frontend:**
+---
+
+## 6. CI/CD Pipeline
+
+GitHub Actions workflow (`.github/workflows/ci.yml`):
+
+| Job | Steps | Triggers |
+|-----|-------|----------|
+| **Backend** | Java 21 setup, Maven compile, test (31 tests), package, Docker build | Push to main, PR |
+| **Frontend** | Node 20 setup, npm ci, lint, test (16 tests, 1 skipped), build, Docker build | Push to main, PR |
+
+---
+
+## 7. Testing
+
+| Layer | Framework | Tests | Notes |
+|-------|-----------|-------|-------|
+| Backend | JUnit 5 + Mockito | 31 tests (domain services) | H2 in PostgreSQL mode for integration |
+| Frontend | Vitest + Testing Library | 16 tests + 1 skipped | jsdom environment, static rendering |
+
+### Running Tests
+
 ```bash
-# In root directory
-npm install
-npm run dev
+# Backend
+cd backend-java && mvn test -pl domains -am
+
+# Frontend
+npm test
 ```
-
----
-
-## 5. API Reference (Examples)
-
-### Auth
-*   `POST /api/auth/login`: Authenticate and receive JWT.
-*   `GET /api/auth/me`: Get current user profile.
-
-### Inventory
-*   `GET /api/inventory/parts`: List spare parts.
-*   `POST /api/inventory/transactions`: Record usage or purchase.
-
-### Gemini AI (Proxy)
-*   `POST /api/gemini/generate`: Securely generate insights using backend key.
-    *   *Body:* `{ "prompt": "Analyze mining data..." }`
-
----
-
-*End of Documentation*
- 
----
-
-## 6. Frontend Architecture Updates
-
-- Configuration via environment: `VITE_API_BASE_URL` controls backend URL at build/runtime.
-- HTTP abstraction: centralized `fetchJson` adds Authorization, handles errors, and cancels stale GET requests.
-- Error handling: root `ErrorBoundary` prevents full-app crash and shows a safe fallback.
-- Performance: `React.lazy` + `Suspense` for large views to reduce initial bundle; caching prepared via Query Client Provider.
-- Accessibility: interactive widgets (e.g., combobox) include ARIA roles and keyboard support.
-- Testing: `vitest` + Testing Library for UI smoke tests; add more tests as modules grow.
