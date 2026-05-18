@@ -21,6 +21,7 @@
     ],
     "no-case-declarations": "off",
     "jsx-a11y/label-has-associated-control": "warn",
-    "react/no-unescaped-entities": "warn"
+    "react/no-unescaped-entities": "warn",
+    "react/prop-types": "off"
   }
 }

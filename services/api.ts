@@ -2,7 +2,7 @@ import { fetchJson } from '../lib/http'
 import { setAuthData, clearAuthData } from './authStorage'
 export { getCurrentUser } from './authStorage'
 
-import { transformSparePart, transformSparePartToAPI, transformInventoryTransaction, transformInventoryTransactionToAPI, transformEquipment, transformEquipmentToAPI, transformDashboardStats } from './apiTransformers'
+import { transformSparePart, transformSparePartToAPI, transformInventoryTransaction, transformInventoryTransactionToAPI, transformEquipment, transformEquipmentToAPI, transformDashboardStats, transformGoodsShipment, transformShipmentToAPI } from './apiTransformers'
 
 export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   return fetchJson<T>(endpoint, options)
@@ -312,17 +312,20 @@ export const shipmentsAPI = {
         if (filters?.to_date) params.append('to_date', filters.to_date);
 
         const query = params.toString();
-        return apiRequest<any[]>(`/shipments${query ? `?${query}` : ''}`);
+        const data = await apiRequest<any[]>(`/shipments${query ? `?${query}` : ''}`);
+        return (data || []).map(transformGoodsShipment);
     },
 
     async getShipment(id: string) {
-        return apiRequest<any>(`/shipments/${id}`);
+        const data = await apiRequest<any>(`/shipments/${id}`);
+        return transformGoodsShipment(data);
     },
 
     async createShipment(shipmentData: any) {
+        const apiData = transformShipmentToAPI(shipmentData);
         return apiRequest(`/shipments`, {
             method: 'POST',
-            body: JSON.stringify(shipmentData),
+            body: JSON.stringify(apiData),
         });
     },
 

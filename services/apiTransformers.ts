@@ -1,7 +1,7 @@
 // API Data Transformers
 // Converts backend snake_case API responses to frontend camelCase types
 
-import { SparePart, InventoryTransaction, Equipment, Supplier, Employee } from '../types';
+import { SparePart, InventoryTransaction, Equipment, Supplier, Employee, GoodsShipment, ShipmentItem } from '../types';
 
 // ============================================================================
 // SPARE PARTS TRANSFORMERS
@@ -202,5 +202,72 @@ export function transformDashboardStats(apiData: any): any {
             lowStockCount: Number(apiData.inventory?.low_stock_count || 0),
             lowStockItems: (apiData.inventory?.low_stock_items || []).map(transformSparePart)
         }
+    };
+}
+
+// ============================================================================
+// GOODS SHIPMENT TRANSFORMERS
+// ============================================================================
+
+export function transformShipmentItem(apiData: any): ShipmentItem {
+    return {
+        partId: apiData.part_id || '',
+        partName: apiData.part_name || apiData.partName || '',
+        partNumber: apiData.part_code || apiData.part_number || apiData.partNumber || '',
+        quantity: Number(apiData.quantity) || 0,
+        unit: apiData.unit || apiData.unit_code || '',
+        notes: apiData.notes || '',
+        unitCode: apiData.unit_code || ''
+    };
+}
+
+export function transformGoodsShipment(apiData: any): GoodsShipment {
+    return {
+        id: apiData.id,
+        doNumber: apiData.do_number || '',
+        date: apiData.date || '',
+        sourceLocationId: apiData.source_location_id || '',
+        sourceLocationName: apiData.source_location_name || '',
+        targetType: apiData.target_type || 'LOCATION',
+        targetId: apiData.target_location_id || apiData.target_supplier_id || '',
+        targetName: apiData.target_location_name || apiData.target_supplier_name || '',
+        transportProvider: apiData.transport_provider || '',
+        targetAddress: apiData.target_address || '',
+        driverName: apiData.driver_employee_name || apiData.external_driver_name || '',
+        transportUnit: apiData.vehicle_equipment_code || apiData.external_vehicle_desc || '',
+        policeNumber: apiData.police_number || '',
+        status: apiData.status || 'PENDING',
+        notes: apiData.notes || '',
+        items: (apiData.items || []).map(transformShipmentItem),
+        createdBy: apiData.created_by || apiData.createdBy || ''
+    };
+}
+
+export function transformShipmentToAPI(data: Partial<GoodsShipment>): any {
+    const isInternal = data.transportProvider === 'INTERNAL';
+    return {
+        date: data.date,
+        source_location_id: data.sourceLocationId,
+        source_location_name: data.sourceLocationName,
+        target_type: data.targetType,
+        target_location_id: data.targetId,
+        target_name: data.targetName,
+        transport_provider: data.transportProvider,
+        driver_employee_id: isInternal && data.driverName ? data.driverName : null,
+        vehicle_equipment_id: isInternal && data.transportUnit ? data.transportUnit : null,
+        external_driver_name: !isInternal ? (data.driverName || null) : null,
+        external_vehicle_desc: !isInternal ? (data.transportUnit || null) : null,
+        police_number: data.policeNumber,
+        do_number: data.doNumber || undefined,
+        status: data.status,
+        notes: data.notes || '',
+        items: (data.items || []).map(item => ({
+            part_id: item.partId,
+            part_code: item.partNumber,
+            part_name: item.partName,
+            quantity: item.quantity,
+            notes: item.notes || '',
+            unit_code: item.unitCode || ''
+        }))
     };
 }

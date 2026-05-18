@@ -163,7 +163,7 @@ export interface MaintenanceRecord {
   type: 'Preventive' | 'Corrective' | 'Inspection';
   damageType: string; // e.g., 'Engine', 'Hydraulic'
   priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-  status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_PART' | 'CANCEL' | 'CLOSED';
+  status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_PART' | 'CANCELLED' | 'CLOSED';
 
   // Timing for KPI (MTTR)
   startDate: string;
@@ -251,6 +251,12 @@ export interface ShipmentItem {
   unitCode?: string;
 }
 
+export type GoodsShipmentStatus = 'PENDING' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
+export const GOODS_SHIPMENT_STATUSES: readonly GoodsShipmentStatus[] = ['PENDING', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED'];
+export function isGoodsShipmentStatus(v: unknown): v is GoodsShipmentStatus {
+	return GOODS_SHIPMENT_STATUSES.includes(v as GoodsShipmentStatus);
+}
+
 export interface GoodsShipment {
   id: string;
   doNumber: string; // Generated DO-PART-YYYY-XXX
@@ -260,16 +266,19 @@ export interface GoodsShipment {
   sourceLocationName: string;
 
   targetType: 'LOCATION' | 'VENDOR' | 'OTHER';
-  targetId: string; // LocationID or SupplierID or Custom Name
+  targetId?: string; // LocationID or SupplierID or Custom Name
   targetName: string;
+  transportProvider?: string;
   targetAddress?: string;
 
-  driverName: string;
-  transportUnit: string;
+  driverName?: string;
+  transportUnit?: string;
   policeNumber: string;
+  notes?: string;
 
-  items: ShipmentItem[];
-  status: 'SHIPPED';
+  items: [ShipmentItem, ...ShipmentItem[]];
+  // Lifecycle: PENDING → IN_TRANSIT → DELIVERED; any → CANCELLED
+  status: GoodsShipmentStatus;
   createdBy: string;
 }
 

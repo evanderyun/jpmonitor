@@ -125,7 +125,7 @@ const MaintenanceView: React.FC<MaintenanceViewProps> = ({
                                 <option value="IN_PROGRESS">IN PROGRESS</option>
                                 <option value="WAITING_PART">WAITING PART</option>
                                 <option value="CLOSED">CLOSED</option>
-                                <option value="CANCEL">CANCEL</option>
+                                <option value="CANCELLED">CANCELLED</option>
                             </select>
                         </div>
 

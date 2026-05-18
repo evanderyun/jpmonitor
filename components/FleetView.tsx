@@ -546,7 +546,7 @@ const FleetView: React.FC = () => {
             case 'IN_PROGRESS': return 'bg-amber-100 text-amber-800 border-amber-200';
             case 'WAITING_PART': return 'bg-purple-100 text-purple-800 border-purple-200';
             case 'CLOSED': return 'bg-green-100 text-green-800 border-green-200';
-            case 'CANCEL': return 'bg-slate-100 text-slate-600 border-slate-200';
+            case 'CANCELLED': return 'bg-slate-100 text-slate-600 border-slate-200';
             default: return 'bg-slate-100 text-slate-600 border-slate-200';
         }
     };

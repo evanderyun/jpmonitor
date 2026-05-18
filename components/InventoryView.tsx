@@ -276,11 +276,18 @@ const InventoryView: React.FC = () => {
 
             const payload = {
                 date: shipmentForm.date,
-                source_location_id: shipmentForm.sourceLocationId,
-                source_location_name: sourceLocationName,
-                target_type: shipmentForm.targetType,
-                target_id: shipmentForm.targetId,
-                target_name: targetName,
+                sourceLocationId: shipmentForm.sourceLocationId,
+                sourceLocationName: sourceLocationName,
+                targetType: shipmentForm.targetType,
+                targetId: shipmentForm.targetId,
+                targetName: targetName,
+                transportProvider: shipmentForm.transportProvider,
+                driverName: shipmentForm.transportProvider === 'INTERNAL' ? shipmentForm.driverId : shipmentForm.driverName,
+                transportUnit: shipmentForm.transportProvider === 'INTERNAL' ? shipmentForm.vehicleId : shipmentForm.transportUnit,
+                policeNumber: shipmentForm.policeNumber,
+                doNumber: shipmentForm.doNumber || undefined,
+                status: 'PENDING',
+                notes: shipmentForm.notes || '',
                 items: shipmentItems.map(item => ({
                     partId: item.partId,
                     partName: item.partName,
@@ -289,14 +296,7 @@ const InventoryView: React.FC = () => {
                     quantity: item.quantity,
                     notes: item.notes,
                     unitCode: item.unitCode
-                })),
-                driverId: shipmentForm.transportProvider === 'INTERNAL' ? shipmentForm.driverId : null,
-                vehicleId: shipmentForm.transportProvider === 'INTERNAL' ? shipmentForm.vehicleId : null,
-                driver_name: shipmentForm.transportProvider === 'EXTERNAL' ? shipmentForm.driverName : null,
-                transport_unit: shipmentForm.transportProvider === 'EXTERNAL' ? shipmentForm.transportUnit : null,
-                police_number: shipmentForm.policeNumber,
-                do_number: shipmentForm.doNumber || undefined,
-                notes: shipmentForm.notes || ''
+                }))
             };
 
             await shipmentsAPI.createShipment(payload);
